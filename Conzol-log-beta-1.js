@@ -13,10 +13,11 @@
             error: console.error,
             info: console.info,
             debug: console.debug,
-        };
+            setTimeout: console.setTimeout,
+        };  
 
         if (typeof console !== 'undefined' && originalConsole.warn) {
-            originalConsole.warn('🚀 Conzol-log-beta-1.js: Inicializace vylepšeného systému pro záznam konzolových logů.');
+            originalConsole.log('🚀 jirkuv-hlidac.js: Plně Připravena.');
         }
 
         // Pole pro ukládání záznamů konzole
@@ -62,11 +63,14 @@
             originalConsole.info.apply(console, args);
             addLogEntry('INFO', String(args[0]), args.slice(1));
         };
-        console.debug = function(...args) {
+        console.debug = function(...args) {   
             originalConsole.debug.apply(console, args);
             addLogEntry('DEBUG', String(args[0]), args.slice(1));
         };
-
+        console.info = function(...args) {
+            originalConsole.info.apply(console, args);
+            addLogEntry('setTimeout', String(args[0]), args.slice(1));
+        };
         // HTML struktura pro modalní okno
         const jirikModalHTML = `
             <div id="jirik-modal" class="jirik-modal-overlay">
