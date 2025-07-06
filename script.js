@@ -30,20 +30,39 @@ try {
 
 // Globální proměnná pro stav editačního módu
 let isEditMode = false;
+console.log("%cPočáteční stav isEditMode: %c" + isEditMode, "color: red; font-weight: bold;", "color: lightcoral;");
+
 const EDIT_MODE_KEY = 'portfolio_edit_mode_active';
+console.log("%cKonstanta EDIT_MODE_KEY: %c" + EDIT_MODE_KEY, "color: cyan; font-weight: bold;", "color: lightcyan;");
 
 // Identifikátor pro hlavní dokument s editovatelným obsahem stránky ve Firestore
 const DOC_ID = 'websiteContent'; // Původní název 'mainContent' změněn na 'websiteContent' pro konzistenci s DOC_ID v load/save
+console.log("%cKonstanta DOC_ID: %c" + DOC_ID, "color: hotpink; font-weight: bold;", "color: lightpink;");
 
 // Globální proměnné pro data
 let currentModalImageIndex = 0;
+console.log("%cPočáteční hodnota currentModalImageIndex: %c" + currentModalImageIndex, "color: blue; font-weight: bold;", "color: lightblue;");
+
 let editableContentData = {}; // Pro obecný editovatelný text
+console.log("%cPočáteční stav editableContentData: %c" + JSON.stringify(editableContentData), "color: orange; font-weight: bold;", "color: #ffcc99;");
+
 let portfolioItemsData = []; // NOVÉ: Toto bude pole pro uložení jednotlivých položek portfolia
+console.log("%cPočáteční stav portfolioItemsData: %c" + JSON.stringify(portfolioItemsData), "color: purple; font-weight: bold;", "color: #cc99ff;");
+
 let galleryImagesData = null;
+console.log("%cPočáteční stav galleryImagesData: %c" + galleryImagesData, "color: brown; font-weight: bold;", "color: #deb887;");
+
 let savedCodesData = [];
+console.log("%cPočáteční stav savedCodesData: %c" + JSON.stringify(savedCodesData), "color: gold; font-weight: bold;", "color: #ffd700;");
+
 let externalLinksData = [];
+console.log("%cPočáteční stav externalLinksData: %c" + JSON.stringify(externalLinksData), "color: white; font-weight: bold;", "color: lightgray;");
+
 let currentUserId = null;
+console.log("%cPočáteční stav currentUserId: %c" + currentUserId, "color: yellow; font-weight: bold;", "color: lightyellow;");
+
 let editingPortfolioItemId = null; // Používá se pro ID položky v editaci
+console.log("%cPočáteční stav editingPortfolioItemId: %c" + editingPortfolioItemId, "color: green; font-weight: bold;", "color: lightgreen;");
 
 // Toto je přímo pro statické obrázky na strance, ty neslouží k úpravám a ani mazání
 const initialImageUrls = [
@@ -262,7 +281,8 @@ async function saveDataToFirestore() {
         externalLinks: externalLinksData,
         editableContent: editableContentData, // Toto jsou obecné texty
         editorUserId: currentUserId,
-        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+         
     };
 
     try {
@@ -480,7 +500,7 @@ async function initializeApp() {
     setupHtmlEditor();
     setupGallery();
     setupDataManagement();
-
+    //updateGalleryDisplay();
     await loadDataFromFirestore(); // Načte hlavní data i portfolio
     setupFirestoreRealtimeListener(); // Nastaví listenery pro hlavní data i portfolio
 
@@ -491,7 +511,7 @@ async function initializeApp() {
     console.log("Aplikace inicializována.");
     console.log('initializeApp - galleryImagesData na začátku:', galleryImagesData);
 }
-
+//nově jsem testoval zda se obraky zachovají v galerii [ updateGalleryDisplay(); ] 
 // --- Funkce pro přepínání editačního módu ---
 function toggleEditMode() {
     if (!currentUserId) {
@@ -502,7 +522,11 @@ function toggleEditMode() {
 
     if (isEditMode) {
         disableEditMode();
-        // saveDataToFirestore(); // Už se nevolá zde, ukládání je automatické přes listenery nebo specifické funkce
+        
+          saveDataToFirestore(); // Už se nevolá zde, ukládání je automatické přes listenery nebo specifické funkce
+       console.log("%c🔄 Volám funkci updateGalleryDisplay()...", "color: #ff9900; font-weight: bold;");
+         updateGalleryDisplay();
+       console.log("%c✅ Funkce updateGalleryDisplay() dokončena.", "color: #ff00ff; font-weight: bold;");
        // showAlertModal("Editace ukončena", "Režim úprav byl vypnut. Změny byly uloženy.");
     } else {
         enableEditMode();
