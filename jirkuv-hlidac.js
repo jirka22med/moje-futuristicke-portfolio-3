@@ -22,7 +22,7 @@
 
         // Pole pro ukládání záznamů konzole
         const logEntries = [];
-        const maxLogEntries = 2000;
+        const maxLogEntries = 400;
 
         /**
          * Přidá záznam do pole logEntries a aktualizuje zobrazení.
