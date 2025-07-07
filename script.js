@@ -1612,11 +1612,11 @@ function injectFullscreenStyles() {
             z-index: 10000; /* Ještě vyšší z-index, aby byly vidět */
             background-color: rgba(50, 50, 50, 0.6); /* Tmavší, průhledné pozadí */
             color: white;
-            border-radius: 50%; /* Kulaté tlačítka */
+            border-radius: 0%; /* Kulaté tlačítka */
             padding: 10px;
-            font-size: 0.6em;
-            width: 20px;
-            height: 20px;
+            font-size: 1.0em;
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1631,20 +1631,23 @@ function injectFullscreenStyles() {
 
         .modal.fullscreen-mode #prev-image-btn {
             left: 20px;
-             font-size: 0.6em;
+             font-size: 0.8em;
             transform: translateY(-50%);
+  
         }
 
         .modal.fullscreen-mode #next-image-btn {
             right: 20px;
-             font-size: 0.6em;
+             font-size: 0.8em;
+                          
             transform: translateY(-50%);
         }
 
        .modal.fullscreen-mode #fullscreen-btn {
     /* Původní transform: translateY(-50%); zůstává pro vertikální centrování */
     /* Následující řádky přidáš pro horizontální centrování */
-font-size: 0.6em;
+font-size: 0.8em;
+   
     left: 50%; /* Posune levý okraj tlačítka na 50% šířky */
     transform: translate(5px, -50%); /* Posune ho o 5px doprava a o polovinu vlastní výšky nahoru */
 }
@@ -1652,7 +1655,8 @@ font-size: 0.6em;
 .modal.fullscreen-mode #close-modal-btn {
     /* Původní transform: translateY(-50%); zůstává pro vertikální centrování */
     /* Následující řádky přidáš pro horizontální centrování */
-font-size: 0.6em;
+font-size: 0.8em;
+    
     left: 50%; /* Posune levý okraj tlačítka na 50% šířky */
     transform: translate(calc(-100% - 55px), -50%); /* Posune ho o vlastní šířku + 5px doleva a o polovinu vlastní výšky nahoru */
 }
@@ -1666,15 +1670,18 @@ font-size: 0.6em;
         @media (max-width: 480px) {
             .modal.fullscreen-mode #prev-image-btn,
             .modal.fullscreen-mode #next-image-btn {
-                
+                width: 20px;
+                height: 20px;
+                font-size: 0.8em;  
+                 
             }
             .modal.fullscreen-mode #close-modal-btn,
             .modal.fullscreen-mode #fullscreen-btn {
-                font-size: 0.5em;
-                width: 10px;
-                height: 10px;
+                font-size: 0.8em;
+                width: 20px;
+                height: 20px;
                 padding: 5px;
-                top: 10px;
+                  
                 left: 10px; /* Pro close button */
                 right: 10px; /* Pro fullscreen button */
             }
