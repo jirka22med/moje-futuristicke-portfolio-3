@@ -1213,12 +1213,12 @@ function openImageModal(index) {
 
     modalImg.onload = function() {
         console.log(`✅ Obrázek načten: ${currentImage.name}`);
-        modalImg.style.opacity = '1';
+        modalImg.style.opacity = '0.8';
     };
 
     modalImg.onerror = function() {
         console.error(`❌ Chyba načítání: ${currentImage.name}`);
-        modalImg.style.opacity = '1';
+        modalImg.style.opacity = '0.8';
         modalImg.alt = `❌ Chyba načítání: ${currentImage.name}`;
     };
 
@@ -1370,13 +1370,13 @@ function navigateImageModal(direction) {
 
         modalImg.onload = function() {
             console.log(`✅ Navigace dokončena: "${currentImage.name}" na indexu ${currentModalImageIndex}`);
-            modalImg.style.opacity = '1';
+            modalImg.style.opacity = '0.8';
             isNavigating = false; // Uvolni navigaci
         };
 
         modalImg.onerror = function() {
             console.error(`❌ Chyba při navigaci: "${currentImage.name}" na indexu ${currentModalImageIndex}`);
-            modalImg.style.opacity = '1';
+            modalImg.style.opacity = '0.8';
             isNavigating = false; // Uvolni navigaci i při chybě
         };
 
