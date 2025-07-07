@@ -1093,7 +1093,7 @@ function getSafeIndex(index) {
 function toggleBrowserFullscreen() {
     const modal = document.getElementById('image-modal');
     if (!modal) {
-        console.error('❌ Celoobrazovkový režim prohlížeče: Chybí image-modal!');
+       // console.error('❌ Celoobrazovkový režim prohlížeče: Chybí image-modal!');
         return;
     }
 
@@ -1104,7 +1104,7 @@ function toggleBrowserFullscreen() {
                 console.log('🖥️ Prohlížeč: Celoobrazovkový režim ZAPNUT (přes API)');
                 // Styly a stav isFullscreenMode budou aktualizovány přes 'fullscreenchange' listener
             }).catch(err => {
-                console.error(`❌ Chyba při aktivaci prohlížečového fullscreenu: ${err.message}`);
+               // console.error(`❌ Chyba při aktivaci prohlížečového fullscreenu: ${err.message}`);
                 // V případě chyby se ujistíme, že naše interní proměnná je správně nastavena
                 isFullscreenMode = false;
                 updateFullscreenButtonIcon();
@@ -1121,7 +1121,7 @@ function toggleBrowserFullscreen() {
                 console.log('🖥️ Prohlížeč: Celoobrazovkový režim VYPNUT (přes API)');
                 // Styly a stav isFullscreenMode budou aktualizovány přes 'fullscreenchange' listener
             }).catch(err => {
-                console.error(`❌ Chyba při deaktivaci prohlížečového fullscreenu: ${err.message}`);
+               // console.error(`❌ Chyba při deaktivaci prohlížečového fullscreenu: ${err.message}`);
                 // V případě chyby se ujistíme, že naše interní proměnná je správně nastavena
                 isFullscreenMode = true;
                 updateFullscreenButtonIcon();
@@ -1154,7 +1154,7 @@ function resetFullscreenMode() {
             console.log('🖥️ Prohlížeč: Fullscreen ukončen při zavření modalu');
             // Zbytek resetu (CSS třídy, isFullscreenMode) proběhne po události 'fullscreenchange'
         }).catch(err => {
-            console.error(`❌ Chyba při ukončení prohlížečového fullscreenu při zavření modalu: ${err.message}`);
+            //console.error(`❌ Chyba při ukončení prohlížečového fullscreenu při zavření modalu: ${err.message}`);
         });
     }
     // Pokud nejsme ve fullscreenu prohlížeče, ale naše třídy jsou z nějakého důvodu aktivní, resetujeme je
