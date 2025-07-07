@@ -1671,9 +1671,9 @@ font-size: 0.6em;
             .modal.fullscreen-mode #close-modal-btn,
             .modal.fullscreen-mode #fullscreen-btn {
                 font-size: 0.5em;
-                width: 5px;
-                height: 5px;
-                padding: 2px;
+                width: 10px;
+                height: 10px;
+                padding: 5px;
                 top: 10px;
                 left: 10px; /* Pro close button */
                 right: 10px; /* Pro fullscreen button */
