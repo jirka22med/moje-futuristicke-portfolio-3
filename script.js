@@ -1615,8 +1615,8 @@ function injectFullscreenStyles() {
             border-radius: 50%; /* Kulaté tlačítka */
             padding: 10px;
             font-size: 0.6em;
-            width: 50px;
-            height: 50px;
+            width: 20px;
+            height: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1664,7 +1664,7 @@ function injectFullscreenStyles() {
         @media (max-width: 480px) {
             .modal.fullscreen-mode #prev-image-btn,
             .modal.fullscreen-mode #next-image-btn {
-                display: none; /* Skryj navigační tlačítka na extra malých obrazovkách ve fullscreenu */
+               // display: none; /* Skryj navigační tlačítka na extra malých obrazovkách ve fullscreenu */
             }
             .modal.fullscreen-mode #close-modal-btn,
             .modal.fullscreen-mode #fullscreen-btn {
