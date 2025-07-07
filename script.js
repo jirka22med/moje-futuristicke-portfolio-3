@@ -30,39 +30,39 @@ try {
 
 // Globální proměnná pro stav editačního módu
 let isEditMode = false;
-console.log("%cPočáteční stav isEditMode: %c" + isEditMode, "color: red; font-weight: bold;", "color: lightcoral;");
+console.log("isEditMode inicializováno");
 
 const EDIT_MODE_KEY = 'portfolio_edit_mode_active';
-console.log("%cKonstanta EDIT_MODE_KEY: %c" + EDIT_MODE_KEY, "color: cyan; font-weight: bold;", "color: lightcyan;");
+console.log("EDIT_MODE_KEY nastaveno");
 
 // Identifikátor pro hlavní dokument s editovatelným obsahem stránky ve Firestore
-const DOC_ID = 'websiteContent'; // Původní název 'mainContent' změněn na 'websiteContent' pro konzistenci s DOC_ID v load/save
-console.log("%cKonstanta DOC_ID: %c" + DOC_ID, "color: hotpink; font-weight: bold;", "color: lightpink;");
+const DOC_ID = 'websiteContent';
+console.log("DOC_ID nastaveno");
 
 // Globální proměnné pro data
 let currentModalImageIndex = 0;
-console.log("%cPočáteční hodnota currentModalImageIndex: %c" + currentModalImageIndex, "color: blue; font-weight: bold;", "color: lightblue;");
+console.log("currentModalImageIndex inicializováno");
 
-let editableContentData = {}; // Pro obecný editovatelný text
-console.log("%cPočáteční stav editableContentData: %c" + JSON.stringify(editableContentData), "color: orange; font-weight: bold;", "color: #ffcc99;");
+let editableContentData = {};
+console.log("editableContentData inicializováno");
 
-let portfolioItemsData = []; // NOVÉ: Toto bude pole pro uložení jednotlivých položek portfolia
-console.log("%cPočáteční stav portfolioItemsData: %c" + JSON.stringify(portfolioItemsData), "color: purple; font-weight: bold;", "color: #cc99ff;");
+let portfolioItemsData = [];
+console.log("portfolioItemsData inicializováno");
 
 let galleryImagesData = null;
-console.log("%cPočáteční stav galleryImagesData: %c" + galleryImagesData, "color: brown; font-weight: bold;", "color: #deb887;");
+console.log("galleryImagesData inicializováno");
 
 let savedCodesData = [];
-console.log("%cPočáteční stav savedCodesData: %c" + JSON.stringify(savedCodesData), "color: gold; font-weight: bold;", "color: #ffd700;");
+console.log("savedCodesData inicializováno");
 
 let externalLinksData = [];
-console.log("%cPočáteční stav externalLinksData: %c" + JSON.stringify(externalLinksData), "color: white; font-weight: bold;", "color: lightgray;");
+console.log("externalLinksData inicializováno");
 
 let currentUserId = null;
-console.log("%cPočáteční stav currentUserId: %c" + currentUserId, "color: yellow; font-weight: bold;", "color: lightyellow;");
+console.log("currentUserId inicializováno");
 
-let editingPortfolioItemId = null; // Používá se pro ID položky v editaci
-console.log("%cPočáteční stav editingPortfolioItemId: %c" + editingPortfolioItemId, "color: green; font-weight: bold;", "color: lightgreen;");
+let editingPortfolioItemId = null;
+console.log("editingPortfolioItemId inicializováno");
 
 // Toto je přímo pro statické obrázky na strance, ty neslouží k úpravám a ani mazání
 const initialImageUrls = [
@@ -1614,7 +1614,7 @@ function injectFullscreenStyles() {
             color: white;
             border-radius: 50%; /* Kulaté tlačítka */
             padding: 10px;
-            font-size: 2em;
+            font-size: 0.6em;
             width: 50px;
             height: 50px;
             display: flex;
@@ -1669,8 +1669,8 @@ function injectFullscreenStyles() {
             .modal.fullscreen-mode #close-modal-btn,
             .modal.fullscreen-mode #fullscreen-btn {
                 font-size: 1.5em;
-                width: 40px;
-                height: 40px;
+                width: 20px;
+                height: 20px;
                 padding: 5px;
                 top: 10px;
                 left: 10px; /* Pro close button */
@@ -3091,4 +3091,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 //tady začíná url
-
+ 
