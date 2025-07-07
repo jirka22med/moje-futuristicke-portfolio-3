@@ -1666,14 +1666,14 @@ font-size: 0.6em;
         @media (max-width: 480px) {
             .modal.fullscreen-mode #prev-image-btn,
             .modal.fullscreen-mode #next-image-btn {
-               display: flex; /* Skryj navigační tlačítka na extra malých obrazovkách ve fullscreenu */
+                
             }
             .modal.fullscreen-mode #close-modal-btn,
             .modal.fullscreen-mode #fullscreen-btn {
                 font-size: 0.5em;
-                width: 20px;
-                height: 20px;
-                padding: 5px;
+                width: 5px;
+                height: 5px;
+                padding: 2px;
                 top: 10px;
                 left: 10px; /* Pro close button */
                 right: 10px; /* Pro fullscreen button */
