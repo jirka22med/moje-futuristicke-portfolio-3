@@ -1492,6 +1492,7 @@ function injectFullscreenStyles() {
             padding: 0;
             width: 100%;
             height: 100%;
+            text-align: center;
             /* overflow: hidden;  TOTO ZPŮSOBOVALO PROBLÉM, ODSTRANĚNO */
         }
 
@@ -1580,12 +1581,26 @@ function injectFullscreenStyles() {
             margin: 0;
         }
 
-        /* Skrytí ovládacích prvků, které nechceme ve fullscreenu */
+        /* zobrazeny ovládacích prvků, které nechceme ve fullscreenu */
         .modal.fullscreen-mode .modal-header,
         .modal.fullscreen-mode .modal-footer,
-        .modal.fullscreen-mode .position-indicator,
+        /*.modal.fullscreen-mode .position-indicator,*/
         .modal.fullscreen-mode .modal-caption {
             display: none;
+             
+        }
+       
+           /* Centrování indikátoru pozice v celoobrazovkovém režimu */
+        .modal.fullscreen-mode .position-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 1001;
         }
 
         /* Úpravy pro navigační a fullscreen tlačítka ve fullscreenu */
@@ -1607,7 +1622,7 @@ function injectFullscreenStyles() {
             justify-content: center;
             transition: background-color 0.2s ease, opacity 0.2s ease;
             /* Reset původních pozic, pokud byly definovány jinak */
-            top: auto; /* Reset top */
+            top: 95%; /* Reset top */
             bottom: auto; /* Reset bottom */
             left: auto; /* Reset left */
             right: auto; /* Reset right */
@@ -1616,25 +1631,29 @@ function injectFullscreenStyles() {
 
         .modal.fullscreen-mode #prev-image-btn {
             left: 20px;
-            top: 50%;
+             
             transform: translateY(-50%);
         }
 
         .modal.fullscreen-mode #next-image-btn {
             right: 20px;
-            top: 50%;
+             
             transform: translateY(-50%);
         }
 
-        .modal.fullscreen-mode #fullscreen-btn {
-            top: 20px;
-            right: 20px; /* Umístění v pravém horním rohu */
-        }
+       .modal.fullscreen-mode #fullscreen-btn {
+    /* Původní transform: translateY(-50%); zůstává pro vertikální centrování */
+    /* Následující řádky přidáš pro horizontální centrování */
+    left: 50%; /* Posune levý okraj tlačítka na 50% šířky */
+    transform: translate(5px, -50%); /* Posune ho o 5px doprava a o polovinu vlastní výšky nahoru */
+}
 
-        .modal.fullscreen-mode #close-modal-btn {
-            top: 20px;
-            left: 20px; /* Umístění v levém horním rohu */
-        }
+.modal.fullscreen-mode #close-modal-btn {
+    /* Původní transform: translateY(-50%); zůstává pro vertikální centrování */
+    /* Následující řádky přidáš pro horizontální centrování */
+    left: 50%; /* Posune levý okraj tlačítka na 50% šířky */
+    transform: translate(calc(-100% - 55px), -50%); /* Posune ho o vlastní šířku + 5px doleva a o polovinu vlastní výšky nahoru */
+}
 
         /* Hover efekty pro tlačítka ve fullscreenu */
         .modal.fullscreen-mode button:hover {
