@@ -275,6 +275,26 @@ async function saveDataToFirestore() {
         }
     });
 
+// NOVÝ KÓD: Ukládání URL dat ze stávajících portfolio položek
+    document.querySelectorAll('#cloude-projek-test .portfolio-item').forEach(portfolioItem => {
+        const itemId = portfolioItem.dataset.itemId;
+        if (itemId) {
+            // Najdeme odkaz v této portfolio položce
+            const linkElement = portfolioItem.querySelector('a.editable-link');
+            if (linkElement) {
+                const linkTextSpan = linkElement.querySelector('[data-url-editable-text]');
+                const linkText = linkTextSpan ? linkTextSpan.textContent.trim() : '';
+                const linkUrl = linkElement.getAttribute('href') || '';
+                
+                // Uložíme do editableContentData
+                editableContentData[`${itemId}-link-text`] = linkText;
+                editableContentData[`${itemId}-link-url`] = linkUrl;
+                
+                console.log(`💾 Ukládám URL data pro ${itemId}:`, { linkText, linkUrl });
+            }
+        }
+    });
+
     const dataToSave = {
         galleryImages: galleryImagesData,
         savedCodes: savedCodesData,
@@ -426,6 +446,38 @@ function applyEditableContent() {
     });
 }
 
+ // NOVÝ KÓD: Aplikace URL dat na stávající portfolio položky
+        document.querySelectorAll('#cloude-projek-test .portfolio-item').forEach(portfolioItem => {
+            const itemId = portfolioItem.dataset.itemId;
+            if (itemId) {
+                // Načteme uložená URL data
+                const savedLinkText = editableContentData[`${itemId}-link-text`];
+                const savedLinkUrl = editableContentData[`${itemId}-link-url`];
+                
+                // Najdeme odkaz v této portfolio položce
+                const linkElement = portfolioItem.querySelector('a.editable-link');
+                if (linkElement && (savedLinkText || savedLinkUrl)) {
+                    // Aktualizujeme URL
+                    if (savedLinkUrl) {
+                        linkElement.setAttribute('href', savedLinkUrl);
+                    }
+                    
+                    // Aktualizujeme text odkazu
+                    const linkTextSpan = linkElement.querySelector('[data-url-editable-text]');
+                    if (linkTextSpan && savedLinkText) {
+                        linkTextSpan.textContent = savedLinkText;
+                    }
+                    
+                    console.log(`🔄 Aplikuji URL data pro ${itemId}:`, { 
+                        text: savedLinkText, 
+                        url: savedLinkUrl 
+                    });
+                }
+            }
+        });
+
+
+
 // --- NOVÁ FUNKCE: Renderování položek portfolia ---
 function renderPortfolioItems() {
     const portfolioContainer = document.getElementById('jirka-portfolio'); // ZDE JE ZMĚNA: Používáme ID 'jirka-portfolio'
@@ -493,24 +545,50 @@ function renderPortfolioItems() {
     });
 }
 
+// NOVÁ FUNKCE: Rychlé uložení URL dat
+    async function saveUrlDataToFirestore(projectId, urlData) {
+        if (!currentUserId) {
+            console.warn("Nelze uložit URL data - uživatel není přihlášen");
+            return false;
+        }
+
+        try {
+            // Aktualizujeme lokální data
+            editableContentData[`${projectId}-link-text`] = urlData.linkText;
+            editableContentData[`${projectId}-link-url`] = urlData.linkUrl;
+            
+            // Uložíme do Firestore
+            const dataToSave = {
+                editableContent: editableContentData,
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            };                       
+
+            await db.collection('publicContent').doc(DOC_ID).set(dataToSave, { merge: true });
+            console.log(`✅ URL data pro ${projectId} uložena do Firestore`);
+            return true;
+        } catch (error) {
+            console.error('Chyba při ukládání URL dat:', error);
+            return false;
+        }
+    }
+
 
 // --- Funkce pro inicializaci aplikace ---
 async function initializeApp() {
-    setupNavigation();
-    setupHtmlEditor();
-    setupGallery();
-    setupDataManagement();
-    //updateGalleryDisplay();
-    await loadDataFromFirestore(); // Načte hlavní data i portfolio
-    setupFirestoreRealtimeListener(); // Nastaví listenery pro hlavní data i portfolio
+        setupNavigation();
+        setupHtmlEditor();
+        setupGallery();
+        setupDataManagement();
+        
+        await loadDataFromFirestore();
+        setupFirestoreRealtimeListener();
 
-    const currentYearEl = document.getElementById('currentYear');
-    if (currentYearEl) currentYearEl.textContent = new Date().getFullYear();
-
-    showSection(activeSection, true);
-    console.log("Aplikace inicializována.");
-    console.log('initializeApp - galleryImagesData na začátku:', galleryImagesData);
-}
+        const currentYearEl = document.getElementById('currentYear');
+        if (currentYearEl) currentYearEl.textContent = new Date().getFullYear();
+        
+        showSection(activeSection, true);
+        console.log("Aplikace inicializována.");
+    }
 //nově jsem testoval zda se obraky zachovají v galerii [ updateGalleryDisplay(); ] 
 // --- Funkce pro přepínání editačního módu ---
 function toggleEditMode() {
@@ -993,10 +1071,14 @@ function renderSavedCodesDisplay() {
     });
 }
 
- // --- Galerie (ukládá do Firestore) s podporou klávesových zkratek ---
+ // --- Galerie (ukládá do Firestore) s podporou klávesových zkratek + CELOOBRAZOVKOVÝ REŽIM ---
 // DŮLEŽITÉ: Definuj globální proměnnou na začátku skriptu
 // GLOBÁLNÍ PROMĚNNÁ PRO AKTUÁLNÍ INDEX
 //let currentModalImageIndex = 0; // <-- DŮLEŽITÉ: Musí být definovaná někde na začátku!
+
+// NOVÁ GLOBÁLNÍ PROMĚNNÁ PRO CELOOBRAZOVKOVÝ REŽIM
+// Tato proměnná nyní primárně odráží stav prohlížečového fullscreenu.
+let isFullscreenMode = false;
 
 // BEZPEČNÁ FUNKCE PRO ZÍSKÁNÍ PLATNÉHO INDEXU
 function getSafeIndex(index) {
@@ -1006,71 +1088,153 @@ function getSafeIndex(index) {
     return index;
 }
 
+// HLAVNÍ FUNKCE PRO PŘEPÍNÁNÍ CELOOBRAZOVKOVÉHO REŽIMU PROHLÍŽEČE (F11 EFEKT)
+// Tato funkce je nyní jediným vstupním bodem pro aktivaci/deaktivaci fullscreenu.
+function toggleBrowserFullscreen() {
+    const modal = document.getElementById('image-modal');
+    if (!modal) {
+        console.error('❌ Celoobrazovkový režim prohlížeče: Chybí image-modal!');
+        return;
+    }
+
+    if (!document.fullscreenElement) {
+        // Pokud nejsme ve fullscreenu, přepneme modal do fullscreenu
+        if (modal.requestFullscreen) {
+            modal.requestFullscreen().then(() => {
+                console.log('🖥️ Prohlížeč: Celoobrazovkový režim ZAPNUT (přes API)');
+                // Styly a stav isFullscreenMode budou aktualizovány přes 'fullscreenchange' listener
+            }).catch(err => {
+                console.error(`❌ Chyba při aktivaci prohlížečového fullscreenu: ${err.message}`);
+                // V případě chyby se ujistíme, že naše interní proměnná je správně nastavena
+                isFullscreenMode = false;
+                updateFullscreenButtonIcon();
+                updateAllIndicators();
+            });
+        } else {
+            console.warn('⚠️ Váš prohlížeč nepodporuje Fullscreen API.');
+            // Pokud prohlížeč nepodporuje Fullscreen API, nemůžeme nic dělat
+        }
+    } else {
+        // Pokud jsme ve fullscreenu, ukončíme ho
+        if (document.exitFullscreen) {
+            document.exitFullscreen().then(() => {
+                console.log('🖥️ Prohlížeč: Celoobrazovkový režim VYPNUT (přes API)');
+                // Styly a stav isFullscreenMode budou aktualizovány přes 'fullscreenchange' listener
+            }).catch(err => {
+                console.error(`❌ Chyba při deaktivaci prohlížečového fullscreenu: ${err.message}`);
+                // V případě chyby se ujistíme, že naše interní proměnná je správně nastavena
+                isFullscreenMode = true;
+                updateFullscreenButtonIcon();
+                updateAllIndicators();
+            });
+        }
+    }
+}
+
+// Funkce pro aktualizaci ikony tlačítka fullscreen
+function updateFullscreenButtonIcon() {
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    if (fullscreenBtn) {
+        // Ikona se nyní řídí pouze stavem prohlížečového fullscreenu
+        if (document.fullscreenElement) {
+            fullscreenBtn.innerHTML = '🗗'; // Ikona pro minimalizaci
+            fullscreenBtn.title = 'Ukončit celoobrazovkový režim';
+        } else {
+            fullscreenBtn.innerHTML = '🗖'; // Ikona pro maximalizaci
+            fullscreenBtn.title = 'Celoobrazovkový režim';
+        }
+    }
+}
+
+// FUNKCE PRO AUTOMATICKÉ VYPNUTÍ CELOOBRAZOVKOVÉHO REŽIMU PŘI ZAVŘENÍ MODALU
+function resetFullscreenMode() {
+    // Ukončíme skutečný fullscreen prohlížeče, pokud je aktivní
+    if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().then(() => {
+            console.log('🖥️ Prohlížeč: Fullscreen ukončen při zavření modalu');
+            // Zbytek resetu (CSS třídy, isFullscreenMode) proběhne po události 'fullscreenchange'
+        }).catch(err => {
+            console.error(`❌ Chyba při ukončení prohlížečového fullscreenu při zavření modalu: ${err.message}`);
+        });
+    }
+    // Pokud nejsme ve fullscreenu prohlížeče, ale naše třídy jsou z nějakého důvodu aktivní, resetujeme je
+    // (To by se nemělo stávat často, pokud 'fullscreenchange' funguje správně)
+    if (!document.fullscreenElement && isFullscreenMode) {
+        isFullscreenMode = false;
+        const modal = document.getElementById('image-modal');
+        const body = document.body;
+        if (modal) modal.classList.remove('fullscreen-mode');
+        if (body) body.classList.remove('fullscreen-active');
+        updateFullscreenButtonIcon();
+        console.log('🖥️ Celoobrazovkový režim RESETOVÁN (manuálně po zavření modalu)');
+    }
+}
+
 // HLAVNÍ FUNKCE PRO OTEVŘENÍ MODALU - ZPĚT K JEDNODUCHOSTI
 function openImageModal(index) {
-     console.log(`🚀 openImageModal voláno s indexem: ${index}, celkem obrázků: ${galleryImagesData.length}`);
-    
+    console.log(`🚀 openImageModal voláno s indexem: ${index}, celkem obrázků: ${galleryImagesData.length}`);
+
     if (galleryImagesData.length === 0) {
         console.warn('⚠️ Galerie je prázdná!');
         return;
     }
-    
+
     // OPRAVA: Bezpečná kontrola a korekce indexu
     const safeIndex = getSafeIndex(index);
     if (safeIndex === -1) {
         console.error('❌ Nelze zobrazit obrázek - prázdná galerie');
         return;
     }
-    
+
     // KLÍČOVÁ OPRAVA: Vždy nastav index
     currentModalImageIndex = safeIndex;
-     console.log(`✅ Nastavuji currentModalImageIndex na: ${currentModalImageIndex}`);
-    
+    console.log(`✅ Nastavuji currentModalImageIndex na: ${currentModalImageIndex}`);
+
     const modal = document.getElementById('image-modal');
     const modalImg = document.getElementById('modal-img');
-    
+
     if (!modal || !modalImg) {
         console.error('❌ Modal nebo modalImg element nenalezen!');
         return;
     }
-    
+
     // OVĚŘENÍ: Zkontroluj, že index je opravdu platný
     if (currentModalImageIndex < 0 || currentModalImageIndex >= galleryImagesData.length) {
         console.error(`❌ KRITICKÁ CHYBA: Index ${currentModalImageIndex} je mimo rozsah 0-${galleryImagesData.length-1}`);
         currentModalImageIndex = 0; // Fallback na první obrázek
     }
-    
+
     const currentImage = galleryImagesData[currentModalImageIndex];
     console.log(`📸 Zobrazuji obrázek: "${currentImage.name}" na pozici ${currentModalImageIndex + 1}/${galleryImagesData.length}`);
-    
+
     // JEDNODUCHÉ loading
     modalImg.style.transition = 'opacity 0.5s ease-out';
     modalImg.style.opacity = '0.8';
-    
+
     modalImg.onload = function() {
         console.log(`✅ Obrázek načten: ${currentImage.name}`);
         modalImg.style.opacity = '1';
     };
-    
+
     modalImg.onerror = function() {
         console.error(`❌ Chyba načítání: ${currentImage.name}`);
         modalImg.style.opacity = '1';
         modalImg.alt = `❌ Chyba načítání: ${currentImage.name}`;
     };
-    
+
     // Nastavení URL s cache busterem
     const finalUrl = currentImage.url + (currentImage.url.includes('?') ? '&' : '?') + `t=${Date.now()}`;
     modalImg.src = finalUrl;
     modalImg.alt = `${currentImage.name} (${currentModalImageIndex + 1}/${galleryImagesData.length})`;
-    
+
     // Aktualizace všech indikátorů
     updateAllIndicators();
-    
+
     // Otevři modal pouze pokud není už otevřený
     if (!modal.classList.contains('show')) {
         showModal(modal);
     }
-    
+
     // Debug info
     console.log(`🔍 Finální stav: index=${currentModalImageIndex}, obrázek="${currentImage.name}"`);
 }
@@ -1080,21 +1244,22 @@ function updateAllIndicators() {
     updateImageIndicator(currentModalImageIndex, galleryImagesData.length);
     addPositionIndicator(currentModalImageIndex, galleryImagesData.length, galleryImagesData[currentModalImageIndex].name);
     updateNavigationButtons();
+    updateFullscreenButtonIcon(); // Aktualizace ikony při každé aktualizaci
 }
 
 // ZACHOVÁNO: Aktualizace číselných indikátorů
 function updateImageIndicator(currentIndex, totalImages) {
     const currentNumberElement = document.getElementById('current-image-number');
     const totalCountElement = document.getElementById('total-images-count');
-    
+
     if (currentNumberElement) {
         currentNumberElement.textContent = currentIndex + 1;
         console.log(`🔢 current-image-number aktualizován na: ${currentIndex + 1}`);
     }
-    
+
     if (totalCountElement) {
         totalCountElement.textContent = totalImages;
-         console.log(`🔢 total-images-count aktualizován na: ${totalImages}`);
+        console.log(`🔢 total-images-count aktualizován na: ${totalImages}`);
     }
 }
 
@@ -1102,7 +1267,7 @@ function updateImageIndicator(currentIndex, totalImages) {
 function updateNavigationButtons() {
     const prevBtn = document.getElementById('prev-image-btn');
     const nextBtn = document.getElementById('next-image-btn');
-    
+
     if (galleryImagesData.length <= 1) {
         // Pokud je jen jeden nebo žádný obrázek, skryj tlačítka
         if (prevBtn) prevBtn.style.opacity = '0.3';
@@ -1118,9 +1283,9 @@ function updateNavigationButtons() {
 function addPositionIndicator(index, total, name) {
     const modal = document.getElementById('image-modal');
     if (!modal) return;
-    
+
     let indicator = modal.querySelector('.position-indicator');
-    
+
     if (!indicator) {
         indicator = document.createElement('div');
         indicator.className = 'position-indicator';
@@ -1140,7 +1305,7 @@ function addPositionIndicator(index, total, name) {
             modalContent.appendChild(indicator);
         }
     }
-    
+
     indicator.textContent = `${index + 1}/${total} - ${name}`;
     console.log(`📍 Indikátor aktualizován: ${indicator.textContent}`);
 }
@@ -1154,89 +1319,93 @@ function navigateImageModal(direction) {
         console.log('⏳ Navigace již probíhá...');
         return;
     }
-    
-     console.log(`🧭 NAVIGACE: směr=${direction}, současný index=${currentModalImageIndex}`);
-     console.log(`📊 Stav galerie: ${galleryImagesData.length} obrázků`);
-    
+
+    console.log(`🧭 NAVIGACE: směr=${direction}, současný index=${currentModalImageIndex}`);
+    console.log(`📊 Stav galerie: ${galleryImagesData.length} obrázků`);
+
     if (galleryImagesData.length === 0) {
         console.warn('⚠️ Nelze navigovat - prázdná galerie!');
         return;
     }
-    
+
     if (galleryImagesData.length === 1) {
-         console.log('ℹ️ Pouze jeden obrázek - zůstáváme na místě');
+        console.log('ℹ️ Pouze jeden obrázek - zůstáváme na místě');
         updateAllIndicators();
         return;
     }
-    
+
     isNavigating = true;
-    
-     // BEZPEČNÝ výpočet nového indexu - STEP BY STEP DEBUG
+
+    // BEZPEČNÝ výpočet nového indexu - STEP BY STEP DEBUG
     const oldIndex = currentModalImageIndex;
-   console.log(`🔢 PŘED: currentModalImageIndex = ${oldIndex}`);
-    
+    console.log(`🔢 PŘED: currentModalImageIndex = ${oldIndex}`);
+
     let rawNewIndex = currentModalImageIndex + direction;
     console.log(`🔢 RAW: ${oldIndex} + ${direction} = ${rawNewIndex}`);
-    
+
     let safeNewIndex = getSafeIndex(rawNewIndex);
-     console.log(`🔢 SAFE: getSafeIndex(${rawNewIndex}) = ${safeNewIndex}`);
-    
+    console.log(`🔢 SAFE: getSafeIndex(${rawNewIndex}) = ${safeNewIndex}`);
+
     // KRITICKY DŮLEŽITÉ: Nastav index JEDNOZNAČNĚ
     currentModalImageIndex = safeNewIndex;
     console.log(`🔢 FINÁL: currentModalImageIndex nastaveno na ${currentModalImageIndex}`);
-    
+
     // OVĚŘENÍ že se opravdu nastavilo
     if (currentModalImageIndex !== safeNewIndex) {
         console.error(`❌ FATÁLNÍ CHYBA: Index se nenastavil správně! Očekáváno: ${safeNewIndex}, Skutečnost: ${currentModalImageIndex}`);
         currentModalImageIndex = safeNewIndex; // Force fix
     }
-    
+
     // OKAMŽITÁ aktualizace indikátorů
     updateAllIndicators();
-    
+
     const modalImg = document.getElementById('modal-img');
     if (modalImg) {
         const currentImage = galleryImagesData[currentModalImageIndex];
         console.log(`🖼️ Zobrazuji: "${currentImage.name}" na indexu ${currentModalImageIndex}`);
-        
+
         // RYCHLÁ vizuální odezva
         modalImg.style.transition = 'opacity 0.1s ease-out';
         modalImg.style.opacity = '0.8';
-        
+
         modalImg.onload = function() {
-           console.log(`✅ Navigace dokončena: "${currentImage.name}" na indexu ${currentModalImageIndex}`);
+            console.log(`✅ Navigace dokončena: "${currentImage.name}" na indexu ${currentModalImageIndex}`);
             modalImg.style.opacity = '1';
             isNavigating = false; // Uvolni navigaci
         };
-        
+
         modalImg.onerror = function() {
-             console.error(`❌ Chyba při navigaci: "${currentImage.name}" na indexu ${currentModalImageIndex}`);
+            console.error(`❌ Chyba při navigaci: "${currentImage.name}" na indexu ${currentModalImageIndex}`);
             modalImg.style.opacity = '1';
             isNavigating = false; // Uvolni navigaci i při chybě
         };
-        
+
         // Nastavení nového obrázku
         const finalUrl = currentImage.url + (currentImage.url.includes('?') ? '&' : '?') + `t=${Date.now()}`;
         modalImg.src = finalUrl;
         modalImg.alt = `${currentImage.name} (${currentModalImageIndex + 1}/${galleryImagesData.length})`;
-        
+
         console.log(`🎯 NAVIGACE HOTOVÁ: Zobrazuji obrázek "${currentImage.name}" na pozici ${currentModalImageIndex + 1}/${galleryImagesData.length}`);
     } else {
         isNavigating = false; // Uvolni i když není modalImg
     }
 }
 
-// ZACHOVÁNO: Funkce pro zavření modalu
+// UPRAVENÁ FUNKCE PRO ZAVŘENÍ MODALU - S RESETEM CELOOBRAZOVKOVÉHO REŽIMU
 function closeImageModal() {
- //   console.log('🚪 Zavírám modal');
+    console.log('🚪 Zavírám modal');
     const modal = document.getElementById('image-modal');
+
+    // Reset celoobrazovkového režimu před zavřením
+    resetFullscreenMode();
+
     hideModal(modal);
-    
+
     // Reset indexu není potřeba - zůstává pro příští otevření
     console.log(`💾 Index zůstává: ${currentModalImageIndex} pro příští otevření`);
 }
 
-// VYLEPŠENÉ KLÁVESOVÉ ZKRATKY
+// VYLEPŠENÉ KLÁVESOVÉ ZKRATKY - Nyní F11 a tlačítko spouští skutečný fullscreen
 function setupKeyboardNavigation() {
     document.addEventListener('keydown', function(event) {
         const imageModal = document.getElementById('image-modal');
@@ -1256,61 +1425,276 @@ function setupKeyboardNavigation() {
             activeElement.hasAttribute('contenteditable') // Pro případ, že edituješ DIV s contenteditable
         );
 
-        // Pokud uživatel edituje text A stiskl šipku (nebo Esc), NECHÁME šipku fungovat pro textové pole
-        // A NEBUDEME přepínat obrázek. Esc by ale měl fungovat vždy pro zavření modalu.
-        if (isEditingText && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+        // Pokud uživatel edituje text A stiskl šipku nebo F11 (nebo Esc),
+        // Esc by ale měl fungovat vždy pro zavření modalu.
+        if (isEditingText && (event.key === 'ArrowLeft' || event.key === 'ArrowRight' || event.key === 'F11')) {
             // Logiku pro přepínání obrázku v modalu ignorujeme, necháme šipku pro textové pole
-            console.log(`⌨️ Uživatele edituje text. Klávesa ${event.key} bude ignorována pro modal.`);
+            console.log(`⌨️ Uživatel edituje text. Klávesa ${event.key} bude ignorována pro modal.`);
             return; // Důležité: Ukončíme funkci, aby se dál nezpracovávala pro modal
         }
-        
-        // Zabráníme defaultnímu chování šipek (pokud nejsme v textovém poli)
-        if (['ArrowLeft', 'ArrowRight', 'Escape'].includes(event.key)) {
+
+        // Zabráníme defaultnímu chování šipek a F11 (pokud nejsme v textovém poli)
+        if (['ArrowLeft', 'ArrowRight', 'Escape', 'F11'].includes(event.key)) {
             event.preventDefault();
             event.stopPropagation();
         }
-        
+
         console.log(`⌨️ Klávesa stisknuta: ${event.key}`);
-        
+
         switch(event.key) {
             case 'ArrowLeft':
                 console.log('⬅️ Předchozí obrázek (←)');
                 navigateImageModal(-1);
                 break;
-            case 'ArrowRight':  
-               console.log('➡️ Další obrázek (→)');
+            case 'ArrowRight':
+                console.log('➡️ Další obrázek (→)');
                 navigateImageModal(1);
                 break;
             case 'Escape':
                 console.log('🚪 Zavírám modal (ESC)');
                 closeImageModal();
                 break;
+            case 'F11':
+                console.log('🖥️ Přepínám PROHLÍŽEČOVÝ celoobrazovkový režim (F11)');
+                toggleBrowserFullscreen(); // Voláme skutečný prohlížečový fullscreen
+                break;
         }
+    });
+
+    // Listener pro událost fullscreenchange (když uživatel opustí/vstoupí do fullscreenu přes prohlížeč, např. F11)
+    document.addEventListener('fullscreenchange', () => {
+        const modal = document.getElementById('image-modal');
+        const body = document.body;
+        // Aktualizujeme náš stav isFullscreenMode a třídy podle skutečného stavu prohlížeče
+        if (document.fullscreenElement) {
+            console.log('🖥️ Fullscreen prohlížeče je aktivní.');
+            if (modal) modal.classList.add('fullscreen-mode');
+            if (body) body.classList.add('fullscreen-active');
+            isFullscreenMode = true; // Aktualizujeme interní proměnnou
+        } else {
+            console.log('🖥️ Fullscreen prohlížeče byl ukončen.');
+            if (modal) modal.classList.remove('fullscreen-mode');
+            if (body) body.classList.remove('fullscreen-active');
+            isFullscreenMode = false; // Aktualizujeme interní proměnnou
+        }
+        updateFullscreenButtonIcon(); // Aktualizujeme ikonu tlačítka
+        updateAllIndicators(); // Aktualizujeme indikátory (např. pozici)
     });
 }
 
-// OPRAVENÁ FUNKCE SETUP S LEPŠÍMI EVENT LISTENERY
+// Funkce pro dynamické vložení CSS stylů
+function injectFullscreenStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        /* Univerzální reset pro HTML a BODY, aby se zajistilo plné pokrytí viewportu bez okrajů */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            /* overflow: hidden;  TOTO ZPŮSOBOVALO PROBLÉM, ODSTRANĚNO */
+        }
+
+        /* Skrytí posuvníků, pokud by se náhodou objevily při fullscreenu */
+        body.fullscreen-active {
+            overflow: hidden;
+        }
+
+        /* --- Styly pro Celoobrazovkový režim (Fullscreen Mode) --- */
+        .modal.fullscreen-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            max-width: 100vw;
+            max-height: 100vh;
+            background-color: black; /* Čistě černé pozadí pro fullscreen */
+            z-index: 9999; /* Zajištění, že bude nad vším ostatním */
+            display: flex; /* Použití flexboxu pro centrování obsahu */
+            align-items: center; /* Vertikální centrování */
+            justify-content: center; /* Horizontální centrování */
+            padding: 0; /* Bez vnitřního odsazení */
+            backdrop-filter: none; /* Vypnutí rozmazání, aby nic nerušilo */
+            animation: none; /* Vypnutí animace při přepnutí do fullscreenu */
+        }
+
+        .modal.fullscreen-mode .modal-content {
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            animation: none; /* Vypnutí animace při přepnutí do fullscreenu */
+        }
+
+        .modal.fullscreen-mode #modal-img {
+            /* Ponechání automatických rozměrů */
+            width: auto;
+            height: auto;
+            /* Omezení na 60% s centrováním */
+            max-width: 60%;
+            max-height: 60%;
+            /* Zajištění správného poměru stran */
+            object-fit: contain;
+            /* Perfektní centrování pomocí flexboxu */
+            margin: 0; /* Reset všech margin hodnot */
+            /* Cursor pro indikaci možnosti kliknutí */
+            cursor: zoom-out;
+            /* Reset ostatních stylů */
+            border-radius: 0;
+            padding: 0;
+            border: none;
+            transform: none;
+            /* Dodatečné centrování pro jistotu */
+            position: relative;
+            display: block;
+        }
+
+        /* Alternativní způsob centrování pro lepší kompatibilitu */
+        .modal.fullscreen-mode .modal-content {
+            position: relative;
+        }
+
+        .modal.fullscreen-mode #modal-img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            /* Ponechání původních omezení velikosti */
+            max-width: 80%;
+            max-height: 80%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            cursor: zoom-out;
+            border-radius: 0;
+            padding: 0;
+            border: none;
+            margin: 0;
+        }
+
+        /* Skrytí ovládacích prvků, které nechceme ve fullscreenu */
+        .modal.fullscreen-mode .modal-header,
+        .modal.fullscreen-mode .modal-footer,
+        .modal.fullscreen-mode .position-indicator,
+        .modal.fullscreen-mode .modal-caption {
+            display: none;
+        }
+
+        /* Úpravy pro navigační a fullscreen tlačítka ve fullscreenu */
+        .modal.fullscreen-mode #prev-image-btn,
+        .modal.fullscreen-mode #next-image-btn,
+        .modal.fullscreen-mode #fullscreen-btn,
+        .modal.fullscreen-mode #close-modal-btn {
+            position: absolute; /* Absolutní pozice */
+            z-index: 10000; /* Ještě vyšší z-index, aby byly vidět */
+            background-color: rgba(50, 50, 50, 0.6); /* Tmavší, průhledné pozadí */
+            color: white;
+            border-radius: 50%; /* Kulaté tlačítka */
+            padding: 10px;
+            font-size: 2em;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease, opacity 0.2s ease;
+            /* Reset původních pozic, pokud byly definovány jinak */
+            top: auto; /* Reset top */
+            bottom: auto; /* Reset bottom */
+            left: auto; /* Reset left */
+            right: auto; /* Reset right */
+            transform: none; /* Reset transform */
+        }
+
+        .modal.fullscreen-mode #prev-image-btn {
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .modal.fullscreen-mode #next-image-btn {
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .modal.fullscreen-mode #fullscreen-btn {
+            top: 20px;
+            right: 20px; /* Umístění v pravém horním rohu */
+        }
+
+        .modal.fullscreen-mode #close-modal-btn {
+            top: 20px;
+            left: 20px; /* Umístění v levém horním rohu */
+        }
+
+        /* Hover efekty pro tlačítka ve fullscreenu */
+        .modal.fullscreen-mode button:hover {
+            background-color: rgba(80, 80, 80, 0.8);
+        }
+
+        /* Responzivní úpravy pro fullscreen tlačítka */
+        @media (max-width: 480px) {
+            .modal.fullscreen-mode #prev-image-btn,
+            .modal.fullscreen-mode #next-image-btn {
+                display: none; /* Skryj navigační tlačítka na extra malých obrazovkách ve fullscreenu */
+            }
+            .modal.fullscreen-mode #close-modal-btn,
+            .modal.fullscreen-mode #fullscreen-btn {
+                font-size: 1.5em;
+                width: 40px;
+                height: 40px;
+                padding: 5px;
+                top: 10px;
+                left: 10px; /* Pro close button */
+                right: 10px; /* Pro fullscreen button */
+            }
+            .modal.fullscreen-mode #fullscreen-btn {
+                left: auto; /* Reset pro fullscreen button */
+                right: 10px; /* Přesun na pravou stranu */
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    console.log('✅ Celoobrazovkové styly dynamicky vloženy do <head>.');
+}
+
+
+
+// OPRAVENÁ FUNKCE SETUP S LEPŠÍMI EVENT LISTENERY + CELOOBRAZOVKOVÉ TLAČÍTKO
 function setupGallery() {
-  //  console.log('🚀 Inicializuji galerii s opraveným indexováním...');
-    
+    console.log('🚀 Inicializuji galerii s opraveným indexováním a celoobrazovkovým režimem...');
+
+    // Vložení CSS stylů na začátku inicializace
+     injectFullscreenStyles();
+
     const addBtn = document.getElementById('addImageUrlBtn');
     const closeBtn = document.getElementById('close-modal-btn');
     const prevBtn = document.getElementById('prev-image-btn');
     const nextBtn = document.getElementById('next-image-btn');
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
     const saveEditImageBtn = document.getElementById('save-edit-image-btn');
     const cancelEditImageBtn = document.getElementById('cancel-edit-image-btn');
-    
+
     // Event listenery s lepším error handlingem
     if (addBtn) {
         addBtn.addEventListener('click', handleAddImageUrl);
         console.log('✅ Add button listener nastaven');
     }
-    
+
     if (closeBtn) {
         closeBtn.addEventListener('click', closeImageModal);
-         console.log('✅ Close button listener nastaven');
+        console.log('✅ Close button listener nastaven');
     }
-    
+
     // OPRAVA: Robustní navigační tlačítka
     if (prevBtn) {
         prevBtn.addEventListener('click', function(e) {
@@ -1319,148 +1703,161 @@ function setupGallery() {
             console.log('⬅️ Klik na předchozí tlačítko');
             navigateImageModal(-1);
         });
-       console.log('✅ Previous button listener nastaven');
+        console.log('✅ Previous button listener nastaven');
     }
-    
+
     if (nextBtn) {
         nextBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-          //  console.log('➡️ Klik na další tlačítko');
+            console.log('➡️ Klik na další tlačítko');
             navigateImageModal(1);
         });
-       console.log('✅ Next button listener nastaven');
+        console.log('✅ Next button listener nastaven');
     }
-    
+
+    // NOVÝ: Celoobrazovkové tlačítko nyní volá přímo prohlížečový fullscreen
+    if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🖥️ Klik na celoobrazovkové tlačítko (spouští prohlížečový fullscreen)');
+            toggleBrowserFullscreen(); // Tlačítko nyní volá přímo prohlížečový fullscreen
+        });
+        console.log('✅ Fullscreen button listener nastaven');
+    }
+
     // Ostatní listenery
     if (saveEditImageBtn) {
         saveEditImageBtn.addEventListener('click', saveEditedImage);
         console.log('✅ Save edit listener nastaven');
     }
-    
+
     if (cancelEditImageBtn) {
         cancelEditImageBtn.addEventListener('click', () => {
             hideModal(document.getElementById('edit-image-modal'));
         });
         console.log('✅ Cancel edit listener nastaven');
     }
-    
+
     // Nastavení klávesových zkratek
     setupKeyboardNavigation();
-     console.log('✅ Klávesové zkratky nastaveny');
-    
-    console.log('🎉 Galerie s opraveným indexováním je připravena!');
+    console.log('✅ Klávesové zkratky nastaveny (F11 pro skutečný celoobrazovkový režim)');
+
+    console.log('🎉 Galerie s opraveným indexováním a celoobrazovkovým režimem je připravena!');
 }
 
 // OPRAVENÁ FUNKCE PRO AKTUALIZACI ZOBRAZENÍ GALERIE
 function updateGalleryDisplay() {
     console.log('🔄 Aktualizuji zobrazení galerie...');
-    
+
     const container = document.getElementById('gallery-container');
     if (!container) {
         console.error('❌ Gallery container nenalezen!');
         return;
     }
-    
+
     // Prázdná galerie
     if (galleryImagesData.length === 0) {
         container.innerHTML = '<p>Galerie je prázdná.</p>';
         console.log('📭 Galerie je prázdná');
         return;
     }
-    
+
     container.innerHTML = '';
-    
+
     galleryImagesData.forEach((imgData, index) => {
         const div = document.createElement('div');
         div.className = 'gallery-image-wrapper';
         const isOwner = currentUserId && imgData.userId === currentUserId;
 
         div.innerHTML = `
-            <img src="${imgData.url}" alt="${imgData.name || 'Obrázek z galerie'}" 
+            <img src="${imgData.url}" alt="${imgData.name || 'Obrázek z galerie'}"
                  onerror="this.onerror=null;this.src='https://placehold.co/250x200/cccccc/ffffff?text=Obrázek+nelze+načíst';this.alt='Obrázek nelze načíst';">
             <button class="delete-img-btn ${isEditMode && isOwner ? '' : 'hidden'}" title="Smazat obrázek">&times;</button>
             <i class="fas fa-edit edit-icon ${isEditMode && isOwner ? '' : 'hidden'}" data-image-id="${imgData.id}"></i>
         `;
-        
+
         // OPRAVA: Správné předání indexu při kliku na obrázek
         const img = div.querySelector('img');
         img.addEventListener('click', () => {
-             console.log(`🖱️ Klik na obrázek s indexem: ${index}`);
+            console.log(`🖱️ Klik na obrázek s indexem: ${index}`);
             openImageModal(index);
         });
-        
+
         // Delete button
         const deleteBtn = div.querySelector('.delete-img-btn');
         if (deleteBtn) {
             deleteBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                 console.log(`🗑️ Mazání obrázku: ${imgData.name}`);
+                console.log(`🗑️ Mazání obrázku: ${imgData.name}`);
                 deleteGalleryImageFromFirestore(imgData.id);
             });
         }
-        
+
         // Edit button
         const editIcon = div.querySelector('.edit-icon');
         if (editIcon) {
             editIcon.addEventListener('click', (e) => {
                 e.stopPropagation();
-                 console.log(`✏️ Úprava obrázku: ${imgData.name}`);
+                console.log(`✏️ Úprava obrázku: ${imgData.name}`);
                 editImage(imgData.id);
             });
         }
-        
+
         container.appendChild(div);
     });
-    
+
     console.log(`✅ Zobrazení galerie aktualizováno (${galleryImagesData.length} obrázků)`);
-    
+
     // OPRAVA: Po změně galerie resetujeme index pokud je neplatný
     if (currentModalImageIndex >= galleryImagesData.length) {
         currentModalImageIndex = Math.max(0, galleryImagesData.length - 1);
-         console.log(`🔧 Index resetován na: ${currentModalImageIndex}`);
+        console.log(`🔧 Index resetován na: ${currentModalImageIndex}`);
     }
 }
 
 // VYLEPŠENÁ DEBUG FUNKCE
 function debugGallery() {
-   console.log('🔍 === DEBUG GALERIE ===');
-     console.log(`📊 Celkem obrázků: ${galleryImagesData.length}`);
-     console.log(`📍 Aktuální index: ${currentModalImageIndex}`);
-     console.log(`🎯 Aktuální obrázek: ${galleryImagesData[currentModalImageIndex]?.name || 'ŽÁDNÝ/NEPLATNÝ'}`);
-     console.log(`✅ Index je platný: ${currentModalImageIndex >= 0 && currentModalImageIndex < galleryImagesData.length}`);
-    
+    console.log('🔍 === DEBUG GALERIE ===');
+    console.log(`📊 Celkem obrázků: ${galleryImagesData.length}`);
+    console.log(`📍 Aktuální index: ${currentModalImageIndex}`);
+    console.log(`🎯 Aktuální obrázek: ${galleryImagesData[currentModalImageIndex]?.name || 'ŽÁDNÝ/NEPLATNÝ'}`);
+    console.log(`✅ Index je platný: ${currentModalImageIndex >= 0 && currentModalImageIndex < galleryImagesData.length}`);
+    console.log(`🖥️ Celoobrazovkový režim: ${document.fullscreenElement ? 'ZAPNUT (prohlížečový)' : 'VYPNUT'}`);
+
     console.log('📋 Seznam všech obrázků:');
     galleryImagesData.forEach((img, index) => {
         const indicator = index === currentModalImageIndex ? '👉 AKTUÁLNÍ' : '  ';
-         console.log(`${indicator} [${index}]: ${img.name} - ${img.url.substring(0, 50)}...`);
+        console.log(`${indicator} [${index}]: ${img.name} - ${img.url.substring(0, 50)}...`);
     });
-    
+
     console.log('🧪 Simulace navigace:');
     if (galleryImagesData.length > 0) {
         const prevIndex = getSafeIndex(currentModalImageIndex - 1);
         const nextIndex = getSafeIndex(currentModalImageIndex + 1);
-       console.log(`⬅️ Předchozí: index ${prevIndex} (${galleryImagesData[prevIndex]?.name || 'N/A'})`);
+        console.log(`⬅️ Předchozí: index ${prevIndex} (${galleryImagesData[prevIndex]?.name || 'N/A'})`);
         console.log(`➡️ Další: index ${nextIndex} (${galleryImagesData[nextIndex]?.name || 'N/A'})`);
     }
-    
+
     console.log('🔧 Stav DOM elementů:');
     console.log(`Modal existuje: ${!!document.getElementById('image-modal')}`);
     console.log(`Modal img existuje: ${!!document.getElementById('modal-img')}`);
     console.log(`Prev button existuje: ${!!document.getElementById('prev-image-btn')}`);
     console.log(`Next button existuje: ${!!document.getElementById('next-image-btn')}`);
-    
+    console.log(`Fullscreen button existuje: ${!!document.getElementById('fullscreen-btn')}`);
+
     console.log('======================');
 }
 
 // POMOCNÉ FUNKCE (zůstávají stejné)
 function isValidHttpUrl(string) {
     let url;
-    try { 
-        url = new URL(string); 
+    try {
+        url = new URL(string);
     }
-    catch (_) { 
-        return false; 
+    catch (_) {
+        return false;
     }
     return url.protocol === "http:" || url.protocol === "https:";
 }
@@ -1471,18 +1868,18 @@ async function handleAddImageUrl() {
         showAlertModal("Přístup zamítnut", "Pro přidání obrázku se musíte přihlásit.");
         return;
     }
-    
+
     const urlInput = document.getElementById('newImageUrl');
     if (!urlInput) {
         console.error("Element #newImageUrl not found for adding gallery image.");
         return;
     }
-    
+
     const imageUrl = urlInput.value.trim();
     if (imageUrl && isValidHttpUrl(imageUrl)) {
         const imageNamePrompt = prompt(`Zadejte název pro obrázek (URL: ${imageUrl.substring(0,50)}...). Prázdné pro výchozí název.`, `Obrázek ${galleryImagesData.length + 1}`);
         let imageName = (imageNamePrompt && imageNamePrompt.trim() !== "") ? imageNamePrompt.trim() : `Obrázek ${galleryImagesData.length + 1}_${Math.floor(Math.random()*1000)}`;
-        
+
         showLoading("Přidávám obrázek...");
         const newImage = {
             id: `img-${Date.now()}-${Math.random().toString(36).substr(2,5)}`,
@@ -1491,16 +1888,16 @@ async function handleAddImageUrl() {
             createdAt: Date.now(),
             userId: currentUserId
         };
-        
+
         try {
             galleryImagesData.unshift(newImage); // Přidá na začátek
             await saveDataToFirestore();
             showAlertModal("Obrázek přidán", `Obrázek "${imageName}" byl uložen do cloudu.`);
             urlInput.value = '';
-            
+
             // OPRAVA: Po přidání nového obrázku aktualizuj zobrazení
             updateGalleryDisplay();
-            
+
             hideLoading();
             console.log(`✅ Přidán nový obrázek: ${imageName}, nová velikost galerie: ${galleryImagesData.length}`);
         } catch (error) {
@@ -1519,7 +1916,7 @@ async function deleteGalleryImageFromFirestore(idToDelete) {
         showAlertModal("Přístup zamítnut", "Pro smazání obrázku se musíte přihlásit.");
         return;
     }
-    
+
     const imageToDelete = galleryImagesData.find(img => img.id === idToDelete);
     if (!imageToDelete || imageToDelete.userId !== currentUserId) {
         showAlertModal("Přístup zamítnut", "Nemáte oprávnění smazat tento obrázek. Můžete smazat pouze své vlastní obrázky.");
@@ -1530,25 +1927,25 @@ async function deleteGalleryImageFromFirestore(idToDelete) {
         showConfirmModal("Smazat obrázek?", `Opravdu smazat "${imageToDelete.name || 'tento obrázek'}"? Tato akce je nevratná!`) :
         confirm(`Smazat obrázek "${imageToDelete.name || 'tento obrázek'}"?`)
     );
-    
+
     if (confirmed) {
         showLoading("Mažu obrázek...");
         try {
             const deletedIndex = galleryImagesData.findIndex(img => img.id === idToDelete);
             galleryImagesData = galleryImagesData.filter(img => img.id !== idToDelete);
-            
+
             // OPRAVA: Korekce indexu po smazání
             if (currentModalImageIndex >= galleryImagesData.length) {
                 currentModalImageIndex = Math.max(0, galleryImagesData.length - 1);
                 console.log(`🔧 Index po smazání korigován na: ${currentModalImageIndex}`);
             }
-            
+
             await saveDataToFirestore();
             showAlertModal("Obrázek smazán", "Obrázek byl úspěšně smazán z cloudu.");
-            
+
             // Aktualizuj zobrazení
             updateGalleryDisplay();
-            
+
             hideLoading();
             console.log(`✅ Obrázek smazán, nová velikost galerie: ${galleryImagesData.length}`);
         } catch (error) {
@@ -1567,7 +1964,7 @@ async function editImage(imageId) {
         showAlertModal("Přístup zamítnut", "Pro úpravu obrázku se musíte přihlásit.");
         return;
     }
-    
+
     editingImageId = imageId;
     const image = galleryImagesData.find(img => img.id === imageId);
     if (!image || image.userId !== currentUserId) {
@@ -1587,7 +1984,7 @@ async function saveEditedImage() {
         showAlertModal("Uložení selhalo", "Pro úpravu obrázku se musíte přihlásit.");
         return;
     }
-    
+
     const url = document.getElementById('edit-image-url').value.trim();
     const name = document.getElementById('edit-image-name').value.trim();
 
@@ -1604,7 +2001,7 @@ async function saveEditedImage() {
             galleryImagesData[index].name = name;
             await saveDataToFirestore();
             showAlertModal("Obrázek upraven", `Obrázek "${name}" byl úspěšně upraven v cloudu.`);
-            
+
             // OPRAVA: Po úpravě aktualizuj zobrazení
             updateGalleryDisplay();
         } else {
@@ -1619,6 +2016,8 @@ async function saveEditedImage() {
     }
 }
 //tady končí obrázek
+
+
 
 // --- Externí odkazy (ukládá do Firestore) ---
 function renderExternalLinks() {
@@ -1698,48 +2097,48 @@ async function editLink(linkId) {
 }
 
 async function saveEditedLink() {
-    if (!currentUserId) {
-        //showAlertModal("Uložení selhalo", "Pro úpravu odkazu se musíte přihlásit.");
-        return;
-    }
-    const title = document.getElementById('edit-link-title').value.trim();
-    const url = document.getElementById('edit-link-url').value.trim();
-
-    if (!title || !url || !isValidHttpUrl(url)) {
-        showAlertModal("Chybějící/neplatné údaje", "Zadejte platný název a URL (http:// nebo https://) pro odkaz.");
-        return;
-    }
-
-    showLoading("Ukládám odkaz...");
-    try {
-        if (editingLinkFirebaseId === null) {
-            const newLink = {
-                id: `link-${Date.now()}-${Math.random().toString(36).substr(2,5)}`,
-                title, url,
-                createdAt: Date.now(),
-                userId: currentUserId
-            };
-            externalLinksData.push(newLink);
-            showAlertModal("Odkaz přidán", `Odkaz "${title}" byl přidán do cloudu.`);
-        } else {
-            const index = externalLinksData.findIndex(l => l.id === editingLinkFirebaseId);
-            if (index !== -1 && externalLinksData[index].userId === currentUserId) {
-                externalLinksData[index].title = title;
-                externalLinksData[index].url = url;
-                showAlertModal("Odkaz upraven", `Odkaz "${title}" byl upraven v cloudu.`);
-            } else {
-                showAlertModal("Chyba", "Odkaz k úpravě nebyl nalezen nebo nemáte oprávnění.");
-            }
+        if (!currentUserId) {
+            showAlertModal("Uložení selhalo", "Pro úpravu odkazu se musíte přihlásit.");
+            return;
         }
-        await saveDataToFirestore();
-        hideModal(document.getElementById('edit-link-modal'));
-        hideLoading();
-    } catch (error) {
-        console.error('Chyba při ukládání odkazu do Firestore:', error);
-        showAlertModal("Chyba ukládání", `Nepodařilo se uložit odkaz: ${error.message}`);
-        hideLoading();
+        const title = document.getElementById('edit-link-title').value.trim();
+        const url = document.getElementById('edit-link-url').value.trim();
+
+        if (!title || !url || !isValidHttpUrl(url)) {
+            showAlertModal("Chybějící/neplatné údaje", "Zadejte platný název a URL (http:// nebo https://) pro odkaz.");
+            return;
+        }
+
+        showLoading("Ukládám odkaz...");
+        try {
+            if (editingLinkFirebaseId === null) {
+                const newLink = {
+                    id: `link-${Date.now()}-${Math.random().toString(36).substr(2,5)}`,
+                    title, url,
+                    createdAt: Date.now(), // ZMĚNA ZDE: Používáme Date.now() pro časový otisk na straně klienta
+                    userId: currentUserId
+                };
+                externalLinksData.push(newLink);
+                showAlertModal("Odkaz přidán", `Odkaz "${title}" byl přidán do cloudu.`);
+            } else {
+                const index = externalLinksData.findIndex(l => l.id === editingLinkFirebaseId);
+                if (index !== -1 && externalLinksData[index].userId === currentUserId) {
+                    externalLinksData[index].title = title;
+                    externalLinksData[index].url = url;
+                    showAlertModal("Odkaz upraven", `Odkaz "${title}" byl upraven v cloudu.`);
+                } else {
+                    showAlertModal("Chyba", "Odkaz k úpravě nebyl nalezen nebo nemáte oprávnění.");
+                }
+            }
+            await saveDataToFirestore();
+            hideModal(document.getElementById('edit-link-modal'));
+            hideLoading();
+        } catch (error) {
+            console.error('Chyba při ukládání odkazu do Firestore:', error);
+            showAlertModal("Chyba ukládání", `Nepodařilo se uložit odkaz: ${error.message}`);
+            hideLoading();
+        }
     }
-}
 
 async function deleteLinkFromFirestore(idToDelete) {
     if (!currentUserId) {
@@ -2669,3 +3068,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+
+
+//tady začíná url
+
