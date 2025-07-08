@@ -3252,63 +3252,9 @@ function initializeResponsiveGrid() {
             transition: transform 0.2s ease;
         }
 
-        .jirkova-sekce-1:hover,
-        .jirkova-sekce-2:hover,
-        .jirkova-sekce-3:hover,
-        .jirkova-sekce-4:hover,
-        .jirkova-sekce-5:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
+        
 
-
-
-        .button {
-            margin-top: auto;
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            text-align: center;
-            transition: background-color 0.2s ease;
-        }
-
-        .button:hover {
-            background-color: #0056b3;
-        }
-
-        /* Responsivní breakpoints */
-        @media (max-width: 768px) {
-            #cloude-projek-test {
-                grid-template-columns: 1fr;
-                gap: 15px;
-                padding: 15px;
-            }
-            
-
-        }
-
-        @media (max-width: 480px) {
-            #cloude-projek-test {
-                padding: 10px;
-                gap: 10px;
-            }
-            
-            .jirkova-sekce-1,
-            .jirkova-sekce-2,
-            .jirkova-sekce-3,
-            .jirkova-sekce-4,
-            .jirkova-sekce-5 {
-                padding: 10px;
-            }
-        }
-
-        /* Skrytí user-id-display */
-        #user-id-display {
-            grid-column: 1 / -1;
-            margin-top: 20px;
-        }
+        
     `;
     
     // Přidáme styly do head
