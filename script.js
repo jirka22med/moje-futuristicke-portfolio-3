@@ -3208,8 +3208,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-// Responsive Grid JavaScript
-// Tento kód vytvoří grid layout s responsivním chováním
+// Vylepšený Responsive Grid JavaScript
+// Tento kód vytvoří grid layout s pokročilým responsivním chováním
 
 function initializeResponsiveGrid() {
     // Najdeme kontejner s projekty
@@ -3223,18 +3223,21 @@ function initializeResponsiveGrid() {
     // Přidáme CSS styly pro grid
     const style = document.createElement('style');
     style.textContent = `
-        /* Grid layout pro desktop */
+        /* Base grid layout */
         #cloude-projek-test {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
             padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
         }
 
         /* Zajistíme, že h2 a p jsou na plnou šířku */
         #cloude-projek-test h2,
         #cloude-projek-test > p {
             grid-column: 1 / -1;
+            margin: 0 0 15px 0;
         }
 
         /* Styly pro jednotlivé sekce */
@@ -3249,44 +3252,255 @@ function initializeResponsiveGrid() {
             border: 1px solid #ddd;
             border-radius: 8px;
             background-color: #f9f9f9;
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            min-height: 200px;
+            box-sizing: border-box;
+            width: 100%;
         }
 
-        
+        .jirkova-sekce-1:hover,
+        .jirkova-sekce-2:hover,
+        .jirkova-sekce-3:hover,
+        .jirkova-sekce-4:hover,
+        .jirkova-sekce-5:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
 
-        
+        .button {
+            margin-top: auto;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            transition: background-color 0.2s ease;
+            display: block;
+            box-sizing: border-box;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Desktop layout - 4 a více sloupců pro velmi široké obrazovky */
+        @media screen and (min-width: 1400px) {
+            #cloude-projek-test {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 25px;
+                padding: 25px;
+            }
+        }
+
+        /* Desktop layout - 3 sloupce pro široké obrazovky */
+        @media screen and (min-width: 1200px) and (max-width: 1399px) {
+            #cloude-projek-test {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                padding: 20px;
+            }
+        }
+
+        /* Desktop layout - 2 sloupce pro střední obrazovky */
+        @media screen and (min-width: 900px) and (max-width: 1199px) {
+            #cloude-projek-test {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+                padding: 20px;
+            }
+        }
+
+        /* Tablet landscape - 2 sloupce pro tablety na šířku */
+        @media screen and (min-width: 769px) and (max-width: 899px) {
+            #cloude-projek-test {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .jirkova-sekce-1,
+            .jirkova-sekce-2,
+            .jirkova-sekce-3,
+            .jirkova-sekce-4,
+            .jirkova-sekce-5 {
+                padding: 12px;
+                min-height: 180px;
+            }
+        }
+
+        /* Tablet portrait a mobil landscape - 1 sloupec */
+        @media screen and (max-width: 768px) {
+            #cloude-projek-test {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .jirkova-sekce-1,
+            .jirkova-sekce-2,
+            .jirkova-sekce-3,
+            .jirkova-sekce-4,
+            .jirkova-sekce-5 {
+                padding: 12px;
+                min-height: 160px;
+            }
+        }
+
+        /* Malé mobily - optimalizace pro velmi malé obrazovky */
+        @media screen and (max-width: 480px) {
+            #cloude-projek-test {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                padding: 10px;
+            }
+            
+            .jirkova-sekce-1,
+            .jirkova-sekce-2,
+            .jirkova-sekce-3,
+            .jirkova-sekce-4,
+            .jirkova-sekce-5 {
+                padding: 10px;
+                min-height: 140px;
+            }
+            
+            .button {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+
+        /* Velmi malé mobily */
+        @media screen and (max-width: 360px) {
+            #cloude-projek-test {
+                gap: 10px;
+                padding: 8px;
+            }
+            
+            .jirkova-sekce-1,
+            .jirkova-sekce-2,
+            .jirkova-sekce-3,
+            .jirkova-sekce-4,
+            .jirkova-sekce-5 {
+                padding: 8px;
+                min-height: 120px;
+            }
+        }
+
+        /* Speciální pravidla pro orientaci zařízení */
+        @media screen and (orientation: landscape) and (max-height: 500px) {
+            .jirkova-sekce-1,
+            .jirkova-sekce-2,
+            .jirkova-sekce-3,
+            .jirkova-sekce-4,
+            .jirkova-sekce-5 {
+                min-height: 120px;
+            }
+        }
+
+        /* Skrytí user-id-display */
+        #user-id-display {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
     `;
     
     // Přidáme styly do head
     document.head.appendChild(style);
 
-    // Funkce pro sledování změn velikosti okna
+    // Pokročilá funkce pro sledování změn velikosti okna a orientace
     function handleResize() {
         const width = window.innerWidth;
+        const height = window.innerHeight;
+        const orientation = width > height ? 'landscape' : 'portrait';
         const gridContainer = document.getElementById('cloude-projek-test');
         
-        if (width <= 360) {
-            // Mobil (malé telefony)
-            gridContainer.style.gridTemplateColumns = 'repeat(1, 1fr)';
-            console.log('Přepnuto na mobil layout - šířka: ' + width + 'px');
-        } else if (width > 360 && width <= 360) {
-            // Tablet (větší telefony a malé tablety)
-            gridContainer.style.gridTemplateColumns = 'repeat(1, 1fr)';
-            console.log('Přepnuto na tablet layout - šířka: ' + width + 'px');
-        } else if (width > 768) {
-            // Desktop (velké tablety a počítače)
-            gridContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
-            console.log('Přepnuto na desktop layout - šířka: ' + width + 'px');
+        if (!gridContainer) return;
+
+        // Určíme počet sloupců na základě šířky a orientace
+        let columns;
+        let layoutType;
+
+        if (width >= 1400) {
+            columns = 3;
+            layoutType = 'extra-wide-desktop';
+        } else if (width >= 1200) {
+            columns = 3;
+            layoutType = 'wide-desktop';
+        } else if (width >= 900) {
+            columns = 2;
+            layoutType = 'desktop';
+        } else if (width >= 769) {
+            columns = 2;
+            layoutType = 'tablet-landscape';
+        } else if (width >= 481) {
+            columns = 1;
+            layoutType = 'tablet-portrait';
+        } else if (width >= 361) {
+            columns = 1;
+            layoutType = 'mobile';
+        } else {
+            columns = 1;
+            layoutType = 'small-mobile';
         }
+
+        // Speciální úprava pro landscape orientaci na malých zařízeních
+        if (orientation === 'landscape' && height < 500) {
+            if (width >= 800) {
+                columns = 2;
+                layoutType = 'mobile-landscape-wide';
+            } else {
+                columns = 1;
+                layoutType = 'mobile-landscape';
+            }
+        }
+
+        // Aplikujeme změny
+        gridContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+        
+        // Přidáme CSS třídu pro další styling
+        gridContainer.className = `grid-layout-${layoutType}`;
+        
+        // Debug info
+        console.log(`Layout změněn na: ${layoutType}`);
+        console.log(`Rozměry: ${width}x${height}, Orientace: ${orientation}, Sloupce: ${columns}`);
     }
 
-    // Přidáme event listener pro změny velikosti okna
-    window.addEventListener('resize', handleResize);
+    // Funkce pro debouncing - zpoždění spuštění funkce
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Vytvoříme debounced verzi handleResize
+    const debouncedResize = debounce(handleResize, 150);
+
+    // Přidáme event listenery
+    window.addEventListener('resize', debouncedResize);
+    window.addEventListener('orientationchange', () => {
+        // Malé zpoždění pro orientationchange kvůli pomalému updatu rozměrů
+        setTimeout(handleResize, 100);
+    });
     
     // Spustíme při načtení
     handleResize();
     
-    console.log('Responsivní grid byl úspěšně inicializován!');
+    console.log('Vylepšený responsivní grid byl úspěšně inicializován!');
+    console.log('Podporované breakpointy:');
+    console.log('- Velmi malé mobily: 0-360px');
+    console.log('- Mobily: 361-480px');
+    console.log('- Tablet portrait: 481-768px');
+    console.log('- Tablet landscape: 769-899px');
+    console.log('- Desktop: 900-1199px');
+    console.log('- Široký desktop: 1200-1399px');
+    console.log('- Extra široký desktop: 1400px+');
 }
 
 // Spustíme když je DOM načten
