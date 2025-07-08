@@ -478,15 +478,125 @@ function applyEditableContent() {
 
 
 
-// --- NOVÁ FUNKCE: Renderování položek portfolia ---
-function renderPortfolioItems() {
-    const portfolioContainer = document.getElementById('jirka-portfolio'); // ZDE JE ZMĚNA: Používáme ID 'jirka-portfolio'
+// --- Funkce pro detekci typu zařízení ---
+// --- Funkce pro detekci typu zařízení ---
+// Tato funkce vrací 'mobile', 'tablet' nebo 'desktop' na základě šířky okna.
+function detectDeviceType() {
+    // Definice breakpointů
+    // Pamatuj: max-width znamená "až do této šířky" (včetně), min-width znamená "od této šířky" (včetně)
+    const isMobileBreakpoint = window.matchMedia("(max-width: 767px)");    // Typicky mobilní telefony na výšku
+    const isTabletBreakpoint = window.matchMedia("(min-width: 768px) and (max-width: 1024px)"); // Typicky tablety
+    const isDesktopBreakpoint = window.matchMedia("(min-width: 1025px)");  // Typicky notebooky a větší monitory
+
+    if (isDesktopBreakpoint.matches) {
+        console.log("Jirko, detekován desktop/notebook!");
+        return 'desktop';
+    } else if (isTabletBreakpoint.matches) {
+        console.log("Jirko, detekován tablet!");
+        return 'tablet';
+    } else if (isMobileBreakpoint.matches) {
+        console.log("Jirko, detekován mobil!");
+        return 'mobile';
+    } else {
+        console.log("Neznámé zařízení - výchozí desktop."); // Fallback
+        return 'desktop'; 
+    }
+}
+
+// --- Funkce pro aplikaci stylů na základě detekovaného zařízení ---
+function applyStylesBasedOnDevice() {
+    const deviceType = detectDeviceType();
+    const portfolioContainer = document.getElementById('jirka-portfolio');
+
     if (!portfolioContainer) {
         console.error("Kontejner pro portfolio položky (#jirka-portfolio) nebyl nalezen!");
         return;
     }
 
-    portfolioContainer.innerHTML = ''; // Vyčistíme kontejner před opětovným vykreslením
+    if (deviceType === 'desktop') {
+        // Styly pro desktop/notebook: položky vedle sebe (min. 500px široké)
+        portfolioContainer.style.display = 'grid';
+        portfolioContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(500px, 1fr))';
+        portfolioContainer.style.gap = '20px';
+        portfolioContainer.style.padding = '20px';
+        portfolioContainer.style.maxWidth = '1200px'; // Maximální šířka celého kontejneru
+        portfolioContainer.style.margin = '0 auto';
+
+        // Příklad úpravy pro jednotlivé portfolio-item na desktopu
+        document.querySelectorAll('.portfolio-item').forEach(item => {
+            item.style.maxWidth = '500px'; // Pokud chceš, aby se položka nikdy neroztáhla přes 500px
+            item.style.padding = '1rem';
+        });
+
+    } else if (deviceType === 'tablet') {
+        // Styly pro tablet: Můžeš mít např. menší minmax nebo jiný gap
+        portfolioContainer.style.display = 'grid';
+        portfolioContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(350px, 1fr));'; // Menší min šířka pro tablet
+        portfolioContainer.style.gap = '15px';
+        portfolioContainer.style.padding = '15px';
+        portfolioContainer.style.maxWidth = '900px'; // Trochu menší max-width pro tablety
+        portfolioContainer.style.margin = '0 auto';
+
+        document.querySelectorAll('.portfolio-item').forEach(item => {
+            item.style.maxWidth = '100%'; // Ať se roztáhne v rámci 1fr
+            item.style.padding = '0.8rem';
+        });
+
+    } else if (deviceType === 'mobile') {
+        // Styly pro mobil: Položky pod sebou (jeden sloupec)
+        portfolioContainer.style.display = 'grid'; // Stále grid, ale jen s jedním sloupcem
+        portfolioContainer.style.gridTemplateColumns = '1fr'; // Jeden sloupec = položky pod sebou
+        portfolioContainer.style.gap = '10px';
+        portfolioContainer.style.padding = '10px';
+        portfolioContainer.style.maxWidth = '100%'; // Na mobilu se kontejner roztáhne na celou šířku
+        portfolioContainer.style.margin = '0'; // Bez centrování, celý okraj stránky
+
+        // Příklad úpravy pro jednotlivé portfolio-item na mobilu
+        document.querySelectorAll('.portfolio-item').forEach(item => {
+            item.style.maxWidth = '100%'; // Položka zabere celou šířku kontejneru
+            item.style.padding = '0.5rem';
+        });
+    }
+}
+
+// --- Umístění volání funkcí ---
+// Důležité: applyStylesBasedOnDevice musí být voláno PŘED renderPortfolioItems
+// nebo alespoň jednou pro nastavení základních stylů kontejneru.
+// A pak znovu při resize.
+
+document.addEventListener('DOMContentLoaded', () => {
+    applyStylesBasedOnDevice(); // Nastaví styly kontejneru na základě typu zařízení
+    renderPortfolioItems();     // Vykreslí položky do již ostylovaného kontejneru
+});
+
+window.addEventListener('resize', () => {
+    // Pro produkční použití je vhodné přidat debounce/throttle pro event resize
+    // aby se funkce nevolala příliš často a nezpůsobovala problémy s výkonem.
+    // Nyní pro rychlé testování to necháme takto.
+    applyStylesBasedOnDevice(); // Při změně velikosti okna znovu aplikujeme styly
+})
+
+// A nezapomeň zavolat applyStylesBasedOnDevice() i po renderování položek
+// pokud renderPortfolioItems je volána nezávisle a styly by se měly aplikovat na již vykreslené položky.
+// Ale pokud applyStylesBasedOnDevice nastavuje styly na kontejner, který renderPortfolioItems plní,
+// pak stačí ji volat před renderPortfolioItems, nebo po ní, pokud chceš manipulovat i s dětmi.
+
+// Upravená renderPortfolioItems, aby neobsahovala duplicitní nastavení stylů kontejneru,
+// jelikož to bude nyní řídit applyStylesBasedOnDevice
+function renderPortfolioItems() {
+    const portfolioContainer = document.getElementById('jirka-portfolio');
+    if (!portfolioContainer) {
+        console.error("Kontejner pro portfolio položky (#jirka-portfolio) nebyl nalezen!");
+        return;
+    }
+
+    // *** Důležité: Odstraňte zde předchozí portfolioContainer.style.xxx nastavení, ***
+    // *** protože to nyní řeší applyStylesBasedOnDevice() ***
+    // portfolioContainer.style.display = 'grid';
+    // portfolioContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(500px, 1fr))';
+    // ... atd.
+
+    portfolioContainer.innerHTML = '';
 
     if (portfolioItemsData.length === 0) {
         portfolioContainer.innerHTML = '<p>Žádné položky portfolia nejsou k dispozici.</p>';
@@ -497,7 +607,7 @@ function renderPortfolioItems() {
         const videoId = getYouTubeVideoId(item.youtubeUrl || '');
         let videoEmbedHtml = '';
         if (videoId) {
-            const embedSrc = `https://www.youtube.com/embed/${videoId}`;
+            const embedSrc = `https://www.youtube.com/embed/${videoId}`; // Opraveno pro HTTPS a správný formát
             videoEmbedHtml = `
                 <div class="portfolio-video-container">
                     <iframe
@@ -513,7 +623,7 @@ function renderPortfolioItems() {
         const isOwner = currentUserId && item.userId === currentUserId;
 
         const newItemHtml = `
-            <div class="portfolio-item" data-item-id="${item.id}" style="background-color: #f9f9f9; padding: 1rem; border-radius: 4px; border: 1px solid #ddd; position: relative; margin-bottom: 20px;">
+            <div class="portfolio-item" data-item-id="${item.id}" style="background-color: #f9f9f9; padding: 1rem; border-radius: 4px; border: 1px solid #ddd; position: relative;">
                 <h3 data-editable-portfolio="title">${item.title || 'Název projektu'}</h3>
                 <p data-editable-portfolio="desc1">${item.desc1 || 'Popis projektu'}</p>
                 ${item.desc2 ? `<p data-editable-portfolio="desc2">${item.desc2}</p>` : ''}
@@ -532,7 +642,6 @@ function renderPortfolioItems() {
         portfolioContainer.insertAdjacentHTML('beforeend', newItemHtml);
     });
 
-    // Aktualizujeme viditelnost editovacích tlačítek po vykreslení
     document.querySelectorAll('.portfolio-item .edit-controls').forEach(controls => {
         const itemId = controls.closest('.portfolio-item').dataset.itemId;
         const item = portfolioItemsData.find(p => p.id === itemId);
@@ -3099,5 +3208,118 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-//tady začíná url
- 
+// Responsive Grid JavaScript
+// Tento kód vytvoří grid layout s responsivním chováním
+
+function initializeResponsiveGrid() {
+    // Najdeme kontejner s projekty
+    const projectContainer = document.getElementById('cloude-projek-test');
+    
+    if (!projectContainer) {
+        console.error('Kontejner #cloude-projek-test nebyl nalezen');
+        return;
+    }
+
+    // Přidáme CSS styly pro grid
+    const style = document.createElement('style');
+    style.textContent = `
+        /* Grid layout pro desktop */
+        #cloude-projek-test {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+
+        /* Zajistíme, že h2 a p jsou na plnou šířku */
+        #cloude-projek-test h2,
+        #cloude-projek-test > p {
+            grid-column: 1 / -1;
+        }
+
+        /* Styly pro jednotlivé sekce */
+        .jirkova-sekce-1,
+        .jirkova-sekce-2,
+        .jirkova-sekce-3,
+        .jirkova-sekce-4,
+        .jirkova-sekce-5 {
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            transition: transform 0.2s ease;
+        }
+
+    
+        
+
+        /* Responsivní breakpoints */
+        @media (max-width: 768px) {
+            #cloude-projek-test {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+
+        }
+
+        @media (max-width: 480px) {
+            #cloude-projek-test {
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .jirkova-sekce-1,
+            .jirkova-sekce-2,
+            .jirkova-sekce-3,
+            .jirkova-sekce-4,
+            .jirkova-sekce-5 {
+                padding: 10px;
+            }
+        }
+
+        /* Skrytí user-id-display */
+        #user-id-display {
+           display: none; 
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+    `;
+    
+    // Přidáme styly do head
+    document.head.appendChild(style);
+
+    // Funkce pro sledování změn velikosti okna
+    function handleResize() {
+        const width = window.innerWidth;
+        const gridContainer = document.getElementById('cloude-projek-test');
+        
+        if (width <= 768) {
+            // Mobilní layout
+            gridContainer.style.gridTemplateColumns = '1fr';
+            console.log('Přepnuto na mobilní layout');
+        } else {
+            // Desktop layout - 2 sloupce
+            gridContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            console.log('Přepnuto na desktop layout');
+        }
+    }
+
+    // Přidáme event listener pro změny velikosti okna
+    window.addEventListener('resize', handleResize);
+    
+    // Spustíme při načtení
+    handleResize();
+    
+    console.log('Responsivní grid byl úspěšně inicializován!');
+}
+
+// Spustíme když je DOM načten
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeResponsiveGrid);
+} else {
+    initializeResponsiveGrid();
+}
