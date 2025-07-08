@@ -1,4 +1,4 @@
-// --- Supabase Konstanty pro AUTENTIZACI ---  
+// --- Supabase Konstanty pro AUTENTIZACI ---
 const SUPABASE_URL = 'https://aknjpurxdbtsxillmqbd.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFrbmpwdXJ4ZGJ0c3hpbGxtcWJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxOTEzMzAsImV4cCI6MjA2Mzc2NzMzMH0.otk-74BBM-SwC_zA0WqqcwGVab5lBfrLiyeYOmh4Xio';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -3319,11 +3319,11 @@ function initializeResponsiveGrid() {
         const width = window.innerWidth;
         const gridContainer = document.getElementById('cloude-projek-test');
         
-        if (width <= 480) {
+        if (width <= 360) {
             // Mobil (malé telefony)
             gridContainer.style.gridTemplateColumns = 'repeat(1, 1fr)';
             console.log('Přepnuto na mobil layout - šířka: ' + width + 'px');
-        } else if (width > 480 && width <= 480) {
+        } else if (width > 360 && width <= 360) {
             // Tablet (větší telefony a malé tablety)
             gridContainer.style.gridTemplateColumns = 'repeat(1, 1fr)';
             console.log('Přepnuto na tablet layout - šířka: ' + width + 'px');
