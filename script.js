@@ -3252,8 +3252,31 @@ function initializeResponsiveGrid() {
             transition: transform 0.2s ease;
         }
 
-    
-        
+        .jirkova-sekce-1:hover,
+        .jirkova-sekce-2:hover,
+        .jirkova-sekce-3:hover,
+        .jirkova-sekce-4:hover,
+        .jirkova-sekce-5:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+
+
+        .button {
+            margin-top: auto;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
 
         /* Responsivní breakpoints */
         @media (max-width: 768px) {
@@ -3283,7 +3306,6 @@ function initializeResponsiveGrid() {
 
         /* Skrytí user-id-display */
         #user-id-display {
-           display: none; 
             grid-column: 1 / -1;
             margin-top: 20px;
         }
@@ -3297,14 +3319,18 @@ function initializeResponsiveGrid() {
         const width = window.innerWidth;
         const gridContainer = document.getElementById('cloude-projek-test');
         
-        if (width <= 768) {
-            // Mobilní layout
+        if (width <= 480) {
+            // Mobil (malé telefony)
             gridContainer.style.gridTemplateColumns = '1fr';
-            console.log('Přepnuto na mobilní layout');
-        } else {
-            // Desktop layout - 2 sloupce
+            console.log('Přepnuto na mobil layout - šířka: ' + width + 'px');
+        } else if (width > 480 && width <= 768) {
+            // Tablet (větší telefony a malé tablety)
+            gridContainer.style.gridTemplateColumns = '1fr';
+            console.log('Přepnuto na tablet layout - šířka: ' + width + 'px');
+        } else if (width > 768) {
+            // Desktop (velké tablety a počítače)
             gridContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
-            console.log('Přepnuto na desktop layout');
+            console.log('Přepnuto na desktop layout - šířka: ' + width + 'px');
         }
     }
 
