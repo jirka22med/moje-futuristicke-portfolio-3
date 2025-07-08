@@ -3321,11 +3321,11 @@ function initializeResponsiveGrid() {
         
         if (width <= 480) {
             // Mobil (malé telefony)
-            gridContainer.style.gridTemplateColumns = '1fr';
+            gridContainer.style.gridTemplateColumns = 'repeat(1, 1fr)';
             console.log('Přepnuto na mobil layout - šířka: ' + width + 'px');
-        } else if (width > 480 && width <= 768) {
+        } else if (width > 480 && width <= 480) {
             // Tablet (větší telefony a malé tablety)
-            gridContainer.style.gridTemplateColumns = '1fr';
+            gridContainer.style.gridTemplateColumns = 'repeat(1, 1fr)';
             console.log('Přepnuto na tablet layout - šířka: ' + width + 'px');
         } else if (width > 768) {
             // Desktop (velké tablety a počítače)
