@@ -37,32 +37,32 @@ console.log("EDIT_MODE_KEY nastaveno");
 
 // Identifikátor pro hlavní dokument s editovatelným obsahem stránky ve Firestore
 const DOC_ID = 'websiteContent';
-console.log("DOC_ID nastaveno");
+console.log('websiteContent byl úspěšně inicializován!');
 
 // Globální proměnné pro data
 let currentModalImageIndex = 0;
-console.log("currentModalImageIndex inicializováno");
+console.log('let currentModalImageIndex = 0 byl úspěšně inicializován!');
 
 let editableContentData = {};
-console.log("editableContentData inicializováno");
+console.log('let editableContentData byl úspěšně inicializován!');
 
 let portfolioItemsData = [];
-console.log("portfolioItemsData inicializováno");
+console.log('let portfolioItemsData byl úspěšně inicializován!');
 
 let galleryImagesData = null;
-console.log("galleryImagesData inicializováno");
+console.log('let galleryImagesData = null byl úspěšně inicializován!');
 
 let savedCodesData = [];
-console.log("savedCodesData inicializováno");
+console.log('let savedCodesData  byl úspěšně inicializován!');
 
 let externalLinksData = [];
-console.log("externalLinksData inicializováno");
+console.log('let externalLinksData byl úspěšně inicializován!');
 
 let currentUserId = null;
-console.log("currentUserId inicializováno");
+console.log('let currentUserId = null byl úspěšně inicializován!');
 
 let editingPortfolioItemId = null;
-console.log("editingPortfolioItemId inicializováno");
+console.log('let editingPortfolioItemId = null byl úspěšně inicializován!');
 
 // Toto je přímo pro statické obrázky na strance, ty neslouží k úpravám a ani mazání
 const initialImageUrls = [
@@ -3258,36 +3258,12 @@ function initializeResponsiveGrid() {
             width: 100%;
         }
 
-        .jirkova-sekce-1:hover,
-        .jirkova-sekce-2:hover,
-        .jirkova-sekce-3:hover,
-        .jirkova-sekce-4:hover,
-        .jirkova-sekce-5:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .button {
-            margin-top: auto;
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            text-align: center;
-            transition: background-color 0.2s ease;
-            display: block;
-            box-sizing: border-box;
-        }
-
-        .button:hover {
-            background-color: #0056b3;
-        }
+         
 
         /* Desktop layout - 4 a více sloupců pro velmi široké obrazovky */
         @media screen and (min-width: 1400px) {
             #cloude-projek-test {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(2, 1fr);
                 gap: 25px;
                 padding: 25px;
             }
@@ -3296,7 +3272,7 @@ function initializeResponsiveGrid() {
         /* Desktop layout - 3 sloupce pro široké obrazovky */
         @media screen and (min-width: 1200px) and (max-width: 1399px) {
             #cloude-projek-test {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(2, 1fr);
                 gap: 20px;
                 padding: 20px;
             }
@@ -3422,10 +3398,10 @@ function initializeResponsiveGrid() {
         let layoutType;
 
         if (width >= 1400) {
-            columns = 3;
+            columns = 2;
             layoutType = 'extra-wide-desktop';
         } else if (width >= 1200) {
-            columns = 3;
+            columns = 2;
             layoutType = 'wide-desktop';
         } else if (width >= 900) {
             columns = 2;
