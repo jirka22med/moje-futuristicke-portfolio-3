@@ -1472,7 +1472,7 @@ body.edit-mode .edit-mode-only { /* NOVINKA: Zobrazujeme edit-mode-only prvky v 
 @media (max-width: 480px) {
     .portfolio-video-container {
         width: 100%;
-        height: auto;
+        height: 20%;
         margin-left: 10px;
         margin-right: 10px;
     }
@@ -1482,7 +1482,7 @@ body.edit-mode .edit-mode-only { /* NOVINKA: Zobrazujeme edit-mode-only prvky v 
 @media (max-width: 320px) {
     .portfolio-video-container {
         width: 100%;
-        height: auto;
+        height: 20%;
         margin-left: 5px;
         margin-right: 5px;
     }
