@@ -3323,28 +3323,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fullscreenButton.id = 'jirka-rezim-obrazovky';
         fullscreenButton.textContent = '⛶'; // Ikonka zůstává
 
-        // Tady upravujeme styly pro shodu s ostatními tlačítky
-        fullscreenButton.style.textDecoration = 'none';
-        fullscreenButton.style.transition = 'all 0.3s ease';
-        fullscreenButton.style.background = 'rgba(255, 255, 255, 0.1)';
-        fullscreenButton.style.backdropFilter = 'blur(5px)';
-        fullscreenButton.style.webkitBackdropFilter = 'blur(5px)';
-        fullscreenButton.style.border = 'none';
-        fullscreenButton.style.cursor = 'pointer';
-        fullscreenButton.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';        
-        fullscreenButton.style.padding = ' 4px 25px  ';       
- 
-        // A. Nové rozměry a zaoblení pro oválný tvar
-        fullscreenButton.style.height = '38px'; // Odhadovaná výška
-        fullscreenButton.style.width = '10px '; // Odhadovaná šířka pro ovál
-        fullscreenButton.style.borderRadius = '20px'; // Polovina výšky pro ovál
-
-        // Styly pro centrování ikonky a její velikost (zůstávají stejné)
-        fullscreenButton.style.display = 'flex';
-        fullscreenButton.style.justifyContent = 'center';
-        fullscreenButton.style.alignItems = 'center';
-        fullscreenButton.style.fontSize = '15px';
-        fullscreenButton.style.lineHeight = '1';
+        
 
 
         fullscreenButton.addEventListener('click', () => {
