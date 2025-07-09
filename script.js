@@ -2753,7 +2753,8 @@ async function deletePortfolioItem(itemIdToDelete) {
             clearBtn: `color: red !important;`,
             exportBtn: `color: white !important;`,
             importBtn: `color: white !important;`,
-            logoutBtn: `color: red !important;`
+            logoutBtn: `color: red !important;`,
+            jirikBtn: `color: white !important;`
         };
 
         if (document.getElementById('save-all-data-btn')) {
@@ -2767,6 +2768,9 @@ async function deletePortfolioItem(itemIdToDelete) {
         }
         if (document.getElementById('import-data-btn')) {
             document.getElementById('import-data-btn').style.cssText = baseButtonVisuals + baseColorStyles.importBtn;
+        }
+        if (document.getElementById('jirik-manual-opener-btn')) {
+            document.getElementById('jirik-manual-opener-btn').style.cssText = baseButtonVisuals + baseColorStyles.jirikBtn;
         }
         if (logoutBtn) {
             logoutBtn.style.cssText = `
@@ -3328,7 +3332,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fullscreenButton.style.border = 'none';
         fullscreenButton.style.cursor = 'pointer';
         fullscreenButton.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';        
-        fullscreenButton.style.padding = ' 5px 25px  ';       
+        fullscreenButton.style.padding = ' 4px 25px  ';       
  
         // A. Nové rozměry a zaoblení pro oválný tvar
         fullscreenButton.style.height = '38px'; // Odhadovaná výška
