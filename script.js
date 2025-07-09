@@ -478,7 +478,7 @@ function applyEditableContent() {
 
 
 
-// --- Funkce pro detekci typu zařízení ---
+// --- Optimalizované funkce pro detekci typu zařízení ---
 // --- Funkce pro detekci typu zařízení ---
 // Tato funkce vrací 'mobile', 'tablet' nebo 'desktop' na základě šířky okna.
 function detectDeviceType() {
@@ -559,27 +559,117 @@ function applyStylesBasedOnDevice() {
     }
 }
 
+// --- Optimalizace výkonu ---
+// Debounce funkce pro omezení častého volání
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Throttle funkce pro omezení frekvence volání
+function throttle(func, limit) {
+    let inThrottle;
+    return function(...args) {
+        if (!inThrottle) {
+            func.apply(this, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
+
+// Cache pro uložení posledního typu zařízení
+let lastDeviceType = null;
+let isResizing = false;
+
+// Optimalizovaná funkce pro aplikaci stylů s cache
+function optimizedApplyStyles() {
+    const currentDeviceType = detectDeviceType();
+    
+    // Pokud se typ zařízení nezměnil, neaplikujeme styly znovu
+    if (lastDeviceType === currentDeviceType && !isResizing) {
+        return;
+    }
+    
+    console.log(`Změna typu zařízení z ${lastDeviceType} na ${currentDeviceType}`);
+    
+    // Aplikujeme styly pouze pokud se typ zařízení změnil
+    applyStylesBasedOnDevice();
+    lastDeviceType = currentDeviceType;
+    isResizing = false;
+}
+
+// Vytvoření optimalizovaných verzí funkcí
+const debouncedApplyStyles = debounce(optimizedApplyStyles, 250); // 250ms zpoždění
+const throttledApplyStyles = throttle(optimizedApplyStyles, 100); // Max 10x za sekundu
+
+// Funkce pro čištění event listenerů
+let resizeHandler = null;
+let orientationHandler = null;
+
+function cleanupEventListeners() {
+    if (resizeHandler) {
+        window.removeEventListener('resize', resizeHandler);
+    }
+    if (orientationHandler) {
+        window.removeEventListener('orientationchange', orientationHandler);
+    }
+}
+
+// Optimalizovaná inicializace
+function initializeOptimizedDeviceDetection() {
+    // Vyčistíme předchozí event listenery
+    cleanupEventListeners();
+    
+    // Nastavíme počáteční stav
+    optimizedApplyStyles();
+    
+    // Vytvoříme optimalizované event handlery
+    resizeHandler = (event) => {
+        isResizing = true;
+        // Kombinujeme throttle pro okamžitou odezvu a debounce pro finální aplikaci
+        throttledApplyStyles();
+        debouncedApplyStyles();
+    };
+    
+    orientationHandler = () => {
+        // Orientationchange potřebuje malé zpoždění
+        setTimeout(() => {
+            isResizing = true;
+            optimizedApplyStyles();
+        }, 100);
+    };
+    
+    // Přidáme event listenery
+    window.addEventListener('resize', resizeHandler, { passive: true });
+    window.addEventListener('orientationchange', orientationHandler, { passive: true });
+    
+    console.log('Optimalizovaný detektor zařízení byl inicializován');
+}
+
 // --- Umístění volání funkcí ---
 // Důležité: applyStylesBasedOnDevice musí být voláno PŘED renderPortfolioItems
 // nebo alespoň jednou pro nastavení základních stylů kontejneru.
 // A pak znovu při resize.
 
 document.addEventListener('DOMContentLoaded', () => {
-    applyStylesBasedOnDevice(); // Nastaví styly kontejneru na základě typu zařízení
-    renderPortfolioItems();     // Vykreslí položky do již ostylovaného kontejneru
+    initializeOptimizedDeviceDetection(); // Inicializace optimalizovaného systému
+    renderPortfolioItems();               // Vykreslí položky do již ostylovaného kontejneru
 });
 
-window.addEventListener('resize', () => {
-    // Pro produkční použití je vhodné přidat debounce/throttle pro event resize
-    // aby se funkce nevolala příliš často a nezpůsobovala problémy s výkonem.
-    // Nyní pro rychlé testování to necháme takto.
-    applyStylesBasedOnDevice(); // Při změně velikosti okna znovu aplikujeme styly
-})
-
-// A nezapomeň zavolat applyStylesBasedOnDevice() i po renderování položek
-// pokud renderPortfolioItems je volána nezávisle a styly by se měly aplikovat na již vykreslené položky.
-// Ale pokud applyStylesBasedOnDevice nastavuje styly na kontejner, který renderPortfolioItems plní,
-// pak stačí ji volat před renderPortfolioItems, nebo po ní, pokud chceš manipulovat i s dětmi.
+// Funkce pro manuální refresh (pokud potřebujete)
+function forceRefreshStyles() {
+    lastDeviceType = null;
+    isResizing = true;
+    optimizedApplyStyles();
+}
 
 // Upravená renderPortfolioItems, aby neobsahovala duplicitní nastavení stylů kontejneru,
 // jelikož to bude nyní řídit applyStylesBasedOnDevice
@@ -652,7 +742,13 @@ function renderPortfolioItems() {
             controls.classList.add('hidden');
         }
     });
+
+    // Po renderování položek znovu aplikujeme styly pro nové elementy
+    optimizedApplyStyles();
 }
+
+// Funkce pro cleanup při opuštění stránky
+window.addEventListener('beforeunload', cleanupEventListeners);
 
 // NOVÁ FUNKCE: Rychlé uložení URL dat
     async function saveUrlDataToFirestore(projectId, urlData) {
