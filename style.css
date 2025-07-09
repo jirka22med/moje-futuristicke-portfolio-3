@@ -1471,7 +1471,7 @@ body.edit-mode .edit-mode-only { /* NOVINKA: Zobrazujeme edit-mode-only prvky v 
 /* Mobilní telefony - malé obrazovky */
 @media (max-width: 480px) {
     .portfolio-video-container {
-        width: 200px;
+        width: 250px;
         height: 150px;
         margin-left: 10px;
         margin-right: 10px;
@@ -1481,7 +1481,7 @@ body.edit-mode .edit-mode-only { /* NOVINKA: Zobrazujeme edit-mode-only prvky v 
 /* Velmi malé mobily */
 @media (max-width: 320px) {
     .portfolio-video-container {
-        width: 200px;
+        width: 250px;
         height: 150px;
         margin-left: 5px;
         margin-right: 5px;
