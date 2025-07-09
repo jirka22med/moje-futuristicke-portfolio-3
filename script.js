@@ -1722,7 +1722,7 @@ function injectFullscreenStyles() {
             width: 100%;
             height: 100%;
             text-align: center;
-            /* overflow: hidden;  TOTO ZPŮSOBOVALO PROBLÉM, ODSTRANĚNO */
+             overflow: hidden;  /*TOTO ZPŮSOBOVALO PROBLÉM, ODSTRANĚNO */
         }
 
         /* Skrytí posuvníků, pokud by se náhodou objevily při fullscreenu */
@@ -3311,20 +3311,28 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// --- JS PRO CELOOBRAZOVÝ REŽIM ---
 document.addEventListener('DOMContentLoaded', () => {
-    const fullscreen = document.getElementById('fullscreen');
+    const dataManagementDiv = document.getElementById('data-management');
 
-    fullscreenaButton.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
-                console.error(`Chyba při pokusu o přechod na celou obrazovku: ${err.message} (${err.name})`);
-            });
-        } else {
-            document.exitFullscreen();
-        }
-    });
+    if (dataManagementDiv) {
+        const fullscreenButton = document.createElement('button');
+        fullscreenButton.id = 'jirka-rezim-obrazovky';
+        fullscreenButton.textContent = 'Celá obrazovka';
+
+        fullscreenButton.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`Chyba při pokusu o fullscreen: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        dataManagementDiv.appendChild(fullscreenButton);
+    }
 });
+
 
 
 
