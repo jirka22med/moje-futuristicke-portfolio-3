@@ -1722,7 +1722,7 @@ function injectFullscreenStyles() {
             width: 100%;
             height: 100%;
             text-align: center;
-             overflow: hidden;  /*TOTO ZPŮSOBOVALO PROBLÉM, ODSTRANĚNO */
+             /*TOTO ZPŮSOBOVALO PROBLÉM, ODSTRANĚNO */
         }
 
         /* Skrytí posuvníků, pokud by se náhodou objevily při fullscreenu */
