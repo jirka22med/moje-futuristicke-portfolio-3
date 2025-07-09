@@ -478,201 +478,218 @@ function applyEditableContent() {
 
 
 
-// --- Optimalizované funkce pro detekci typu zařízení ---
+// --- Optimalizovaný Device Detector s lepším výkonem ---
+
+// Globální proměnné pro optimalizaci
+let currentDeviceType = null;
+let resizeTimeout = null;
+let isInitialized = false;
+
 // --- Funkce pro detekci typu zařízení ---
 // Tato funkce vrací 'mobile', 'tablet' nebo 'desktop' na základě šířky okna.
 function detectDeviceType() {
-    // Definice breakpointů
-    // Pamatuj: max-width znamená "až do této šířky" (včetně), min-width znamená "od této šířky" (včetně)
-    const isMobileBreakpoint = window.matchMedia("(max-width: 767px)");    // Typicky mobilní telefony na výšku
-    const isTabletBreakpoint = window.matchMedia("(min-width: 768px) and (max-width: 1024px)"); // Typicky tablety
-    const isDesktopBreakpoint = window.matchMedia("(min-width: 1025px)");  // Typicky notebooky a větší monitory
-
-    if (isDesktopBreakpoint.matches) {
-        console.log("Jirko, detekován desktop/notebook!");
+    const width = window.innerWidth;
+    
+    // Používáme rychlejší porovnání čísel místo matchMedia
+    if (width >= 1025) {
         return 'desktop';
-    } else if (isTabletBreakpoint.matches) {
-        console.log("Jirko, detekován tablet!");
+    } else if (width >= 768) {
         return 'tablet';
-    } else if (isMobileBreakpoint.matches) {
-        console.log("Jirko, detekován mobil!");
-        return 'mobile';
     } else {
-        console.log("Neznámé zařízení - výchozí desktop."); // Fallback
-        return 'desktop'; 
+        return 'mobile';
     }
 }
 
-// --- Funkce pro aplikaci stylů na základě detekovaného zařízení ---
+// --- Optimalizovaná funkce pro aplikaci stylů ---
 function applyStylesBasedOnDevice() {
-    const deviceType = detectDeviceType();
+    const newDeviceType = detectDeviceType();
+    
+    // Kontrolujeme, zda se typ zařízení skutečně změnil
+    if (currentDeviceType === newDeviceType && isInitialized) {
+        return; // Žádná změna - neaplikujeme styly znovu
+    }
+    
     const portfolioContainer = document.getElementById('jirka-portfolio');
-
+    
     if (!portfolioContainer) {
         console.error("Kontejner pro portfolio položky (#jirka-portfolio) nebyl nalezen!");
         return;
     }
 
-    if (deviceType === 'desktop') {
-        // Styly pro desktop/notebook: položky vedle sebe (min. 500px široké)
-        portfolioContainer.style.display = 'grid';
-        portfolioContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(500px, 1fr))';
-        portfolioContainer.style.gap = '20px';
-        portfolioContainer.style.padding = '20px';
-        portfolioContainer.style.maxWidth = '1200px'; // Maximální šířka celého kontejneru
-        portfolioContainer.style.margin = '0 auto';
+    // Ukládáme aktuální typ zařízení
+    const previousDeviceType = currentDeviceType;
+    currentDeviceType = newDeviceType;
 
-        // Příklad úpravy pro jednotlivé portfolio-item na desktopu
-        document.querySelectorAll('.portfolio-item').forEach(item => {
-            item.style.maxWidth = '500px'; // Pokud chceš, aby se položka nikdy neroztáhla přes 500px
+    // Logování pouze při skutečné změně
+    if (previousDeviceType !== currentDeviceType) {
+        console.log(`Jirko, změna zařízení z "${previousDeviceType}" na "${currentDeviceType}"`);
+    }
+
+    // Aplikujeme styly pomocí CSS tříd místo přímého nastavování stylů
+    // Odstraníme předchozí třídy
+    portfolioContainer.classList.remove('device-desktop', 'device-tablet', 'device-mobile');
+    
+    if (currentDeviceType === 'desktop') {
+        portfolioContainer.classList.add('device-desktop');
+        
+        // Pouze nejnutnější inline styly
+        Object.assign(portfolioContainer.style, {
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
+            gap: '20px',
+            padding: '20px',
+            maxWidth: '1200px',
+            margin: '0 auto'
+        });
+
+        // Optimalizované nastavení pro portfolio items
+        const portfolioItems = portfolioContainer.querySelectorAll('.portfolio-item');
+        portfolioItems.forEach(item => {
+            item.style.maxWidth = '500px';
             item.style.padding = '1rem';
         });
 
-    } else if (deviceType === 'tablet') {
-        // Styly pro tablet: Můžeš mít např. menší minmax nebo jiný gap
-        portfolioContainer.style.display = 'grid';
-        portfolioContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(350px, 1fr));'; // Menší min šířka pro tablet
-        portfolioContainer.style.gap = '15px';
-        portfolioContainer.style.padding = '15px';
-        portfolioContainer.style.maxWidth = '900px'; // Trochu menší max-width pro tablety
-        portfolioContainer.style.margin = '0 auto';
+    } else if (currentDeviceType === 'tablet') {
+        portfolioContainer.classList.add('device-tablet');
+        
+        Object.assign(portfolioContainer.style, {
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+            gap: '15px',
+            padding: '15px',
+            maxWidth: '900px',
+            margin: '0 auto'
+        });
 
-        document.querySelectorAll('.portfolio-item').forEach(item => {
-            item.style.maxWidth = '100%'; // Ať se roztáhne v rámci 1fr
+        const portfolioItems = portfolioContainer.querySelectorAll('.portfolio-item');
+        portfolioItems.forEach(item => {
+            item.style.maxWidth = '100%';
             item.style.padding = '0.8rem';
         });
 
-    } else if (deviceType === 'mobile') {
-        // Styly pro mobil: Položky pod sebou (jeden sloupec)
-        portfolioContainer.style.display = 'grid'; // Stále grid, ale jen s jedním sloupcem
-        portfolioContainer.style.gridTemplateColumns = '1fr'; // Jeden sloupec = položky pod sebou
-        portfolioContainer.style.gap = '10px';
-        portfolioContainer.style.padding = '10px';
-        portfolioContainer.style.maxWidth = '100%'; // Na mobilu se kontejner roztáhne na celou šířku
-        portfolioContainer.style.margin = '0'; // Bez centrování, celý okraj stránky
+    } else if (currentDeviceType === 'mobile') {
+        portfolioContainer.classList.add('device-mobile');
+        
+        Object.assign(portfolioContainer.style, {
+            display: 'grid',
+            gridTemplateColumns: '1fr',
+            gap: '10px',
+            padding: '10px',
+            maxWidth: '100%',
+            margin: '0'
+        });
 
-        // Příklad úpravy pro jednotlivé portfolio-item na mobilu
-        document.querySelectorAll('.portfolio-item').forEach(item => {
-            item.style.maxWidth = '100%'; // Položka zabere celou šířku kontejneru
+        const portfolioItems = portfolioContainer.querySelectorAll('.portfolio-item');
+        portfolioItems.forEach(item => {
+            item.style.maxWidth = '100%';
             item.style.padding = '0.5rem';
+        });
+    }
+    
+    isInitialized = true;
+}
+
+// --- Debounced resize handler pro lepší výkon ---
+function handleResize() {
+    // Zrušíme předchozí timeout
+    if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+    }
+    
+    // Nastavíme nový timeout s krátším zpožděním
+    resizeTimeout = setTimeout(() => {
+        applyStylesBasedOnDevice();
+        resizeTimeout = null;
+    }, 100); // Zpoždění 100ms je dostatečné a responzivní
+}
+
+// --- Throttled resize handler (alternativní řešení) ---
+let isResizing = false;
+
+function throttledResize() {
+    if (!isResizing) {
+        isResizing = true;
+        requestAnimationFrame(() => {
+            applyStylesBasedOnDevice();
+            isResizing = false;
         });
     }
 }
 
-// --- Optimalizace výkonu ---
-// Debounce funkce pro omezení častého volání
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Throttle funkce pro omezení frekvence volání
-function throttle(func, limit) {
-    let inThrottle;
-    return function(...args) {
-        if (!inThrottle) {
-            func.apply(this, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-        }
-    };
-}
-
-// Cache pro uložení posledního typu zařízení
-let lastDeviceType = null;
-let isResizing = false;
-
-// Optimalizovaná funkce pro aplikaci stylů s cache
-function optimizedApplyStyles() {
-    const currentDeviceType = detectDeviceType();
-    
-    // Pokud se typ zařízení nezměnil, neaplikujeme styly znovu
-    if (lastDeviceType === currentDeviceType && !isResizing) {
+// --- Přidání CSS stylů pro lepší výkon ---
+function addOptimizedStyles() {
+    // Zkontrolujeme, zda styly již neexistují
+    if (document.getElementById('device-detector-styles')) {
         return;
     }
+
+    const style = document.createElement('style');
+    style.id = 'device-detector-styles';
+    style.textContent = `
+        /* Základní styly pro všechna zařízení */
+        #jirka-portfolio {
+            transition: all 0.3s ease;
+            will-change: grid-template-columns, gap, padding;
+        }
+        
+        /* Styly pro desktop */
+        #jirka-portfolio.device-desktop {
+            /* Dodatečné styly pro desktop */
+        }
+        
+        /* Styly pro tablet */
+        #jirka-portfolio.device-tablet {
+            /* Dodatečné styly pro tablet */
+        }
+        
+        /* Styly pro mobil */
+        #jirka-portfolio.device-mobile {
+            /* Dodatečné styly pro mobil */
+        }
+        
+        /* Optimalizace pro portfolio items */
+        .portfolio-item {
+            transition: padding 0.2s ease;
+            will-change: padding, max-width;
+        }
+    `;
     
-    console.log(`Změna typu zařízení z ${lastDeviceType} na ${currentDeviceType}`);
-    
-    // Aplikujeme styly pouze pokud se typ zařízení změnil
-    applyStylesBasedOnDevice();
-    lastDeviceType = currentDeviceType;
-    isResizing = false;
+    document.head.appendChild(style);
 }
 
-// Vytvoření optimalizovaných verzí funkcí
-const debouncedApplyStyles = debounce(optimizedApplyStyles, 250); // 250ms zpoždění
-const throttledApplyStyles = throttle(optimizedApplyStyles, 100); // Max 10x za sekundu
-
-// Funkce pro čištění event listenerů
-let resizeHandler = null;
-let orientationHandler = null;
-
-function cleanupEventListeners() {
-    if (resizeHandler) {
-        window.removeEventListener('resize', resizeHandler);
-    }
-    if (orientationHandler) {
-        window.removeEventListener('orientationchange', orientationHandler);
-    }
-}
-
-// Optimalizovaná inicializace
-function initializeOptimizedDeviceDetection() {
-    // Vyčistíme předchozí event listenery
-    cleanupEventListeners();
+// --- Inicializace při načtení stránky ---
+document.addEventListener('DOMContentLoaded', () => {
+    // Přidáme optimalizované styly
+    addOptimizedStyles();
     
     // Nastavíme počáteční stav
-    optimizedApplyStyles();
+    applyStylesBasedOnDevice();
     
-    // Vytvoříme optimalizované event handlery
-    resizeHandler = (event) => {
-        isResizing = true;
-        // Kombinujeme throttle pro okamžitou odezvu a debounce pro finální aplikaci
-        throttledApplyStyles();
-        debouncedApplyStyles();
-    };
+    // Spustíme render portfolio items
+    renderPortfolioItems();
     
-    orientationHandler = () => {
-        // Orientationchange potřebuje malé zpoždění
-        setTimeout(() => {
-            isResizing = true;
-            optimizedApplyStyles();
-        }, 100);
-    };
-    
-    // Přidáme event listenery
-    window.addEventListener('resize', resizeHandler, { passive: true });
-    window.addEventListener('orientationchange', orientationHandler, { passive: true });
-    
-    console.log('Optimalizovaný detektor zařízení byl inicializován');
-}
-
-// --- Umístění volání funkcí ---
-// Důležité: applyStylesBasedOnDevice musí být voláno PŘED renderPortfolioItems
-// nebo alespoň jednou pro nastavení základních stylů kontejneru.
-// A pak znovu při resize.
-
-document.addEventListener('DOMContentLoaded', () => {
-    initializeOptimizedDeviceDetection(); // Inicializace optimalizovaného systému
-    renderPortfolioItems();               // Vykreslí položky do již ostylovaného kontejneru
+    console.log('Optimalizovaný device detector inicializován');
 });
 
-// Funkce pro manuální refresh (pokud potřebujete)
-function forceRefreshStyles() {
-    lastDeviceType = null;
-    isResizing = true;
-    optimizedApplyStyles();
+// --- Optimalizované sledování změn velikosti okna ---
+// Použijeme throttled verzi pro lepší výkon
+window.addEventListener('resize', throttledResize, { passive: true });
+
+// --- Sledování změn orientace pro mobilní zařízení ---
+window.addEventListener('orientationchange', () => {
+    // Malé zpoždění pro orientationchange
+    setTimeout(() => {
+        applyStylesBasedOnDevice();
+    }, 150);
+}, { passive: true });
+
+// --- Funkce pro manuální refresh (pokud je potřeba) ---
+function refreshDeviceDetection() {
+    currentDeviceType = null; // Resetujeme cache
+    applyStylesBasedOnDevice();
 }
 
-// Upravená renderPortfolioItems, aby neobsahovala duplicitní nastavení stylů kontejneru,
-// jelikož to bude nyní řídit applyStylesBasedOnDevice
+// --- Upravená renderPortfolioItems funkce ---
 function renderPortfolioItems() {
     const portfolioContainer = document.getElementById('jirka-portfolio');
     if (!portfolioContainer) {
@@ -680,12 +697,7 @@ function renderPortfolioItems() {
         return;
     }
 
-    // *** Důležité: Odstraňte zde předchozí portfolioContainer.style.xxx nastavení, ***
-    // *** protože to nyní řeší applyStylesBasedOnDevice() ***
-    // portfolioContainer.style.display = 'grid';
-    // portfolioContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(500px, 1fr))';
-    // ... atd.
-
+    // Vyčistíme kontejner
     portfolioContainer.innerHTML = '';
 
     if (portfolioItemsData.length === 0) {
@@ -693,11 +705,14 @@ function renderPortfolioItems() {
         return;
     }
 
+    // Vytvoříme fragment pro lepší výkon
+    const fragment = document.createDocumentFragment();
+
     portfolioItemsData.forEach(item => {
         const videoId = getYouTubeVideoId(item.youtubeUrl || '');
         let videoEmbedHtml = '';
         if (videoId) {
-            const embedSrc = `https://www.youtube.com/embed/${videoId}`; // Opraveno pro HTTPS a správný formát
+            const embedSrc = `https://www.youtube.com/embed/${videoId}`;
             videoEmbedHtml = `
                 <div class="portfolio-video-container">
                     <iframe
@@ -712,43 +727,52 @@ function renderPortfolioItems() {
 
         const isOwner = currentUserId && item.userId === currentUserId;
 
-        const newItemHtml = `
-            <div class="portfolio-item" data-item-id="${item.id}" style="background-color: #f9f9f9; padding: 1rem; border-radius: 4px; border: 1px solid #ddd; position: relative;">
-                <h3 data-editable-portfolio="title">${item.title || 'Název projektu'}</h3>
-                <p data-editable-portfolio="desc1">${item.desc1 || 'Popis projektu'}</p>
-                ${item.desc2 ? `<p data-editable-portfolio="desc2">${item.desc2}</p>` : ''}
+        // Vytvoříme element místo innerHTML pro lepší výkon
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'portfolio-item';
+        itemDiv.setAttribute('data-item-id', item.id);
+        itemDiv.style.cssText = 'background-color: #f9f9f9; padding: 1rem; border-radius: 4px; border: 1px solid #ddd; position: relative;';
+        
+        itemDiv.innerHTML = `
+            <h3 data-editable-portfolio="title">${item.title || 'Název projektu'}</h3>
+            <p data-editable-portfolio="desc1">${item.desc1 || 'Popis projektu'}</p>
+            ${item.desc2 ? `<p data-editable-portfolio="desc2">${item.desc2}</p>` : ''}
 
-                ${videoEmbedHtml}
+            ${videoEmbedHtml}
 
-                <a href="${item.linkUrl || '#'}" class="button editable-link" target="_blank" rel="noopener noreferrer">
-                    ${item.linkText || 'Zobrazit projekt →'}
-                </a>
-                <div class="edit-controls ${isEditMode && isOwner ? '' : 'hidden'}">
-                    <button onclick="editPortfolioItem('${item.id}')">Editovat</button>
-                    <button onclick="deletePortfolioItem('${item.id}')" class="button btn-danger">Smazat</button>
-                </div>
+            <a href="${item.linkUrl || '#'}" class="button editable-link" target="_blank" rel="noopener noreferrer">
+                ${item.linkText || 'Zobrazit projekt →'}
+            </a>
+            <div class="edit-controls ${isEditMode && isOwner ? '' : 'hidden'}">
+                <button onclick="editPortfolioItem('${item.id}')">Editovat</button>
+                <button onclick="deletePortfolioItem('${item.id}')" class="button btn-danger">Smazat</button>
             </div>
         `;
-        portfolioContainer.insertAdjacentHTML('beforeend', newItemHtml);
+        
+        fragment.appendChild(itemDiv);
     });
 
-    document.querySelectorAll('.portfolio-item .edit-controls').forEach(controls => {
+    // Přidáme všechny elementy najednou
+    portfolioContainer.appendChild(fragment);
+
+    // Nastavíme viditelnost edit controls
+    portfolioContainer.querySelectorAll('.portfolio-item .edit-controls').forEach(controls => {
         const itemId = controls.closest('.portfolio-item').dataset.itemId;
         const item = portfolioItemsData.find(p => p.id === itemId);
         const isOwner = currentUserId && item && item.userId === currentUserId;
-        if (isEditMode && isOwner) {
-            controls.classList.remove('hidden');
-        } else {
-            controls.classList.add('hidden');
-        }
+        controls.classList.toggle('hidden', !(isEditMode && isOwner));
     });
 
-    // Po renderování položek znovu aplikujeme styly pro nové elementy
-    optimizedApplyStyles();
+    // Po renderování aplikujeme styly pro aktuální zařízení
+    applyStylesBasedOnDevice();
 }
 
-// Funkce pro cleanup při opuštění stránky
-window.addEventListener('beforeunload', cleanupEventListeners);
+// --- Vystavení funkcí pro debugging ---
+window.deviceDetector = {
+    getCurrentDeviceType: () => currentDeviceType,
+    refresh: refreshDeviceDetection,
+    getWidth: () => window.innerWidth
+};
 
 // NOVÁ FUNKCE: Rychlé uložení URL dat
     async function saveUrlDataToFirestore(projectId, urlData) {
