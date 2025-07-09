@@ -3313,15 +3313,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // --- JS PRO CELOOBRAZOVÝ REŽIM ---
 document.addEventListener('DOMContentLoaded', () => {
-    const fullscreenaButton = document.getElementById('fullscreenaButton');
+    const fullscreen = document.getElementById('fullscreen');
 
     fullscreenaButton.addEventListener('click', () => {
-        if (!document.fullscreenaElement) {
-            document.documentElement.requestFullscreena().catch(err => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
                 console.error(`Chyba při pokusu o přechod na celou obrazovku: ${err.message} (${err.name})`);
             });
         } else {
-            document.exitFullscreena();
+            document.exitFullscreen();
         }
     });
 });
