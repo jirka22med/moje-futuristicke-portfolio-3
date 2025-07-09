@@ -3312,12 +3312,23 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    const dataManagementDiv = document.getElementById('data-management');
+    const navContainerDiv = document.querySelector('.nav-container');
 
-    if (dataManagementDiv) {
+    if (navContainerDiv) {
         const fullscreenButton = document.createElement('button');
         fullscreenButton.id = 'jirka-rezim-obrazovky';
-        fullscreenButton.textContent = 'Celá obrazovka';
+        fullscreenButton.textContent = '⛶';
+
+        // Tady přidáváme ty tvoje styly přímo do elementu
+        fullscreenButton.style.textDecoration = 'none';
+        fullscreenButton.style.transition = 'all 0.3s ease';
+        fullscreenButton.style.background = 'rgba(255, 255, 255, 0.1)';
+        fullscreenButton.style.backdropFilter = 'blur(5px)';
+        fullscreenButton.style.webkitBackdropFilter = 'blur(5px)'; // Pro Safari a starší prohlížeče
+        fullscreenButton.style.border = 'none';
+        fullscreenButton.style.cursor = 'pointer';
+        fullscreenButton.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+        fullscreenButton.style.borderRadius = '10px';
 
         fullscreenButton.addEventListener('click', () => {
             if (!document.fullscreenElement) {
@@ -3329,7 +3340,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        dataManagementDiv.appendChild(fullscreenButton);
+        navContainerDiv.appendChild(fullscreenButton);
     }
 });
 
