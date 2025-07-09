@@ -3327,11 +3327,12 @@ document.addEventListener('DOMContentLoaded', () => {
         fullscreenButton.style.webkitBackdropFilter = 'blur(5px)';
         fullscreenButton.style.border = 'none';
         fullscreenButton.style.cursor = 'pointer';
-        fullscreenButton.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
-
+        fullscreenButton.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';        
+        fullscreenButton.style.padding = ' 5px 25px  ';       
+ 
         // A. Nové rozměry a zaoblení pro oválný tvar
         fullscreenButton.style.height = '38px'; // Odhadovaná výška
-        fullscreenButton.style.width = '10px'; // Odhadovaná šířka pro ovál
+        fullscreenButton.style.width = '10px '; // Odhadovaná šířka pro ovál
         fullscreenButton.style.borderRadius = '20px'; // Polovina výšky pro ovál
 
         // Styly pro centrování ikonky a její velikost (zůstávají stejné)
