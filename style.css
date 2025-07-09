@@ -1463,8 +1463,8 @@ body.edit-mode .edit-mode-only { /* NOVINKA: Zobrazujeme edit-mode-only prvky v 
 /* Tablet - střední obrazovky */
 @media (max-width: 768px) {
     .portfolio-video-container {
-        width: 300px;
-        height: 150px;
+        width: 250px;
+        height: 100px;
     }
 }
 
