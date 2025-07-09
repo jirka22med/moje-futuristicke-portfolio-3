@@ -81,7 +81,7 @@ nav {
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
-.nav-link, .cela-obrazovka  {
+.nav-link, #edit-mode-toggle-btn, #login-button, #jirka-rezim-obrazovky{
     color: white;
     text-decoration: none;
     padding: 0.5rem 1rem;
@@ -93,7 +93,7 @@ nav {
     font-size: 0.9rem;
 }
 
-.nav-link:hover, .nav-link.active, .cela-obrazovka:hover, .cela-obrazovka.active {
+.nav-link:hover, .nav-link.active, #edit-mode-toggle-btn, #login-button, #jirka-rezim-obrazovky{
     background: rgba(255, 255, 255, 0.25);
      
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
@@ -222,16 +222,20 @@ section h2 {
     background: white;
 }
 
-.button, button {
-    background: var(--primary-gradient);
+  button {
+    background: rgba(255, 255, 255, 0.1);
     color: white  ; 
     border: none;
-    padding: 10px 40px;
-    border-radius: 25px;
+    padding: 10px 20px;
+    border-radius: 10px;
     cursor: pointer;
     font-size: 1rem;
     font-weight: bold;
-    
+   backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px); /* Pro Safari */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      
+      
     margin: 0.5rem;
     text-decoration: none; 
     display: inline-block;
@@ -857,7 +861,7 @@ body.edit-mode .edit-mode-only { /* NOVINKA: Zobrazujeme edit-mode-only prvky v 
         padding: 1rem 0; /* Zvětšený padding pro dvouřádkovou navigaci */
     }
 
-    .nav-link {
+    .nav-link, #edit-mode-toggle-btn, #login-button, #jirka-rezim-obrazovky  {
         padding: 0.6rem 0.8rem;
         font-size: 0.85rem;
         margin: 0; /* Odstraníme margin, protože používáme grid gap */
@@ -1003,7 +1007,7 @@ body.edit-mode .edit-mode-only { /* NOVINKA: Zobrazujeme edit-mode-only prvky v 
         align-items: center;
     }
     
-    .nav-link {
+    .nav-link, #edit-mode-toggle-btn, #login-button, #jirka-rezim-obrazovky  {
         font-size: 0.75rem;
         padding: 0.5rem 0.4rem;
         margin: 0;
@@ -1142,7 +1146,7 @@ body.edit-mode .edit-mode-only { /* NOVINKA: Zobrazujeme edit-mode-only prvky v 
         align-items: center;
     }
     
-    .nav-link {
+    .nav-link, #edit-mode-toggle-btn, #login-button, #jirka-rezim-obrazovky  {
         font-size: 0.7rem;
         padding: 0.4rem 0.2rem;
         margin: 0;
