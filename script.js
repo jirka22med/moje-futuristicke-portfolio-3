@@ -1726,9 +1726,9 @@ function injectFullscreenStyles() {
         }
 
         /* Skrytí posuvníků, pokud by se náhodou objevily při fullscreenu */
-        body.fullscreen-active {
+       /* body.fullscreen-active {
             overflow: hidden;
-        }
+        }*/
 
         /* --- Styly pro Celoobrazovkový režim (Fullscreen Mode) --- */
         .modal.fullscreen-mode {
@@ -3313,15 +3313,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // --- JS PRO CELOOBRAZOVÝ REŽIM ---
 document.addEventListener('DOMContentLoaded', () => {
-    const fullscreenButton = document.getElementById('fullscreenButton');
+    const fullscreenaButton = document.getElementById('fullscreenaButton');
 
-    fullscreenButton.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
+    fullscreenaButton.addEventListener('click', () => {
+        if (!document.fullscreenaElement) {
+            document.documentElement.requestFullscreena().catch(err => {
                 console.error(`Chyba při pokusu o přechod na celou obrazovku: ${err.message} (${err.name})`);
             });
         } else {
-            document.exitFullscreen();
+            document.exitFullscreena();
         }
     });
 });
