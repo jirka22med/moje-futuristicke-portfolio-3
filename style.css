@@ -1463,16 +1463,16 @@ body.edit-mode .edit-mode-only { /* NOVINKA: Zobrazujeme edit-mode-only prvky v 
 /* Tablet - střední obrazovky */
 @media (max-width: 768px) {
     .portfolio-video-container {
-        width: 150px;
-        height: 100px;
+        width: 100px;
+        height: 50px;
     }
 }
 
 /* Mobilní telefony - malé obrazovky */
 @media (max-width: 480px) {
     .portfolio-video-container {
-        width: 150px;
-        height: 100px;
+        width: 100px;
+        height: 50px;
         margin-left: 10px;
         margin-right: 10px;
     }
@@ -1481,8 +1481,8 @@ body.edit-mode .edit-mode-only { /* NOVINKA: Zobrazujeme edit-mode-only prvky v 
 /* Velmi malé mobily */
 @media (max-width: 320px) {
     .portfolio-video-container {
-        width: 150px;
-        height: 100px;
+        width: 100px;
+        height: 50px;
         margin-left: 5px;
         margin-right: 5px;
     }
