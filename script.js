@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', async function() { // Zde je klí�
                 document.getElementById('edit-mode-toggle-btn').textContent = ' 💾';
             } else {
                 disableEditMode();
-                document.getElementById('edit-mode-toggle-btn').textContent = '🔧';
+                document.getElementById('edit-mode-toggle-btn').textContent = '🔐';
             }
         } else {
             console.log('Uživatel není přihlášen přes Supabase.');
@@ -887,7 +887,7 @@ function enableEditMode() {
 function disableEditMode() {
     isEditMode = false;
     document.body.classList.remove('edit-mode');
-    document.getElementById('edit-mode-toggle-btn').textContent = '🔧';
+    document.getElementById('edit-mode-toggle-btn').textContent = '🔐';
 
     if (!currentUserId) {
         document.getElementById('login-button').classList.remove('hidden');
@@ -2782,133 +2782,136 @@ async function deletePortfolioItem(itemIdToDelete) {
     }
 
     function applyDataManagementResponsiveStyles() {
-        const container = document.querySelector('.function-setupDataManagement');
-        const innerContainer = document.querySelector('.function-setupDataManagement .data-management-container');
-        const buttons = document.querySelectorAll('.function-setupDataManagement .button');
+    const container = document.querySelector('.function-setupDataManagement');
+    const innerContainer = document.querySelector('.function-setupDataManagement .data-management-container');
+    const buttons = document.querySelectorAll('.function-setupDataManagement .button');
 
-        if (!container || !innerContainer || buttons.length === 0) {
-            return;
-        }
-
-        if (container.style.display === 'none') {
-            return;
-        }
-
-        const width = window.innerWidth;
-
-        buttons.forEach(btn => {
-            btn.style.padding = '';
-            btn.style.fontSize = '';
-            btn.style.margin = '';
-            btn.style.width = '';
-            btn.style.textAlign = '';
-            btn.style.whiteSpace = '';
-            btn.style.overflow = '';
-            btn.style.textOverflow = '';
-        });
-
-        if (width >= 768) {
-            container.style.maxWidth = '800px';
-            container.style.width = '100%';
-            container.style.padding = '1.5rem 2rem';
-            container.style.margin = '2rem auto';
-
-            innerContainer.style.display = 'grid';
-            innerContainer.style.gridTemplateColumns = 'repeat(7, 1fr)';
-            innerContainer.style.gap = '1.5rem';
-            innerContainer.style.padding = '0 1rem';
-
-            buttons.forEach(btn => {
-                btn.style.padding = '1rem 1.2rem';
-                btn.style.fontSize = '1rem';
-            });
-        } else if (width < 768 && width >= 481) {
-            container.style.maxWidth = '400px';
-            container.style.width = '100%';
-            container.style.padding = '1rem 0.5rem';
-            container.style.margin = '1rem auto';
-
-            innerContainer.style.display = 'grid';
-            innerContainer.style.gridTemplateColumns = 'repeat(4, 1fr)';
-            innerContainer.style.gap = '0.8rem';
-            innerContainer.style.justifyItems = 'center';
-            innerContainer.style.alignItems = 'center';
-            innerContainer.style.padding = '0 0.5rem';
-
-            buttons.forEach(btn => {
-                btn.style.padding = '0.8rem 1rem';
-                btn.style.fontSize = '0.85rem';
-                btn.style.margin = '0';
-                btn.style.width = '100%';
-                btn.style.textAlign = 'center';
-                btn.style.whiteSpace = 'nowrap';
-                btn.style.overflow = 'hidden';
-                btn.style.textOverflow = 'ellipsis';
-            });
-        } else if (width <= 480 && width >= 321) {
-            container.style.maxWidth = '425px';
-            container.style.width = '100%';
-            container.style.padding = '0.8rem 0.25rem';
-            container.style.margin = '0.8rem auto';
-
-            innerContainer.style.display = 'grid';
-            innerContainer.style.gridTemplateColumns = 'repeat(4, 1fr)';
-            innerContainer.style.gap = '0.6rem';
-            innerContainer.style.justifyItems = 'center';
-            innerContainer.style.alignItems = 'center';
-            innerContainer.style.padding = '0 0.25rem';
-
-            buttons.forEach(btn => {
-                btn.style.fontSize = '0.75rem';
-                btn.style.padding = '0.7rem 0.8rem';
-                btn.style.margin = '0';
-                btn.style.width = '100%';
-                btn.style.textAlign = 'center';
-                btn.style.whiteSpace = 'nowrap';
-                btn.style.overflow = 'hidden';
-                btn.style.textOverflow = 'ellipsis';
-            });
-        } else if (width <= 320) {
-            container.style.maxWidth = '200px';
-            container.style.width = '100%';
-            container.style.padding = '0.6rem 0.1rem';
-            container.style.margin = '0.6rem auto';
-
-            innerContainer.style.display = 'grid';
-            innerContainer.style.gridTemplateColumns = 'repeat(4, 1fr)';
-            innerContainer.style.gap = '0.4rem';
-            innerContainer.style.justifyItems = 'center';
-            innerContainer.style.alignItems = 'center';
-            innerContainer.style.padding = '0 0.1rem';
-
-            buttons.forEach(btn => {
-                btn.style.fontSize = '0.7rem';
-                btn.style.padding = '0.6rem 0.4rem';
-                btn.style.margin = '0';
-                btn.style.width = '100%';
-                btn.style.textAlign = 'center';
-                btn.style.whiteSpace = 'nowrap';
-                btn.style.overflow = 'hidden';
-                btn.style.textOverflow = 'ellipsis';
-            });
-        }
+    if (!container || !innerContainer || buttons.length === 0) {
+        return;
     }
 
-    function observeEditMode() {
-        const body = document.body;
+    if (container.style.display === 'none') {
+        return;
+    }
 
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                    if (body.classList.contains('edit-mode')) {
-                        showDataManagementButtons();
-                        applyDataManagementResponsiveStyles();
-                    } else {
-                        hideDataManagementButtons();
-                    }
-                }
-            });
+    const width = window.innerWidth;
+
+    buttons.forEach(btn => {
+        btn.style.padding = '';
+        btn.style.fontSize = '';
+        btn.style.margin = '';
+        btn.style.width = '';
+        btn.style.textAlign = '';
+        btn.style.whiteSpace = '';
+        btn.style.overflow = '';
+        btn.style.textOverflow = '';
+    });
+
+    if (width >= 768) {
+        container.style.maxWidth = '800px';
+        container.style.width = '100%';
+        container.style.padding = '1rem 2rem'; // ZMENŠENO (bylo 1.5rem)
+        container.style.margin = '1.5rem auto'; // ZMENŠENO (bylo 2rem)
+
+        innerContainer.style.display = 'grid';
+        innerContainer.style.gridTemplateColumns = 'repeat(7, 1fr)';
+        innerContainer.style.gap = '1rem'; // ZMENŠENO (bylo 1.5rem)
+        innerContainer.style.padding = '0 1rem';
+
+        buttons.forEach(btn => {
+            btn.style.padding = '0.7rem 1.2rem'; // ZMENŠENO (bylo 1rem)
+            btn.style.fontSize = '1rem';
         });
+    } else if (width < 768 && width >= 481) {
+        container.style.maxWidth = '400px';
+        container.style.width = '100%';
+        container.style.padding = '0.7rem 0.5rem'; // ZMENŠENO (bylo 1rem)
+        container.style.margin = '0.7rem auto'; // ZMENŠENO (bylo 1rem)
+
+        innerContainer.style.display = 'grid';
+        innerContainer.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        innerContainer.style.gap = '0.5rem'; // ZMENŠENO (bylo 0.8rem)
+        innerContainer.style.justifyItems = 'center';
+        innerContainer.style.alignItems = 'center';
+        innerContainer.style.padding = '0 0.5rem';
+
+        buttons.forEach(btn => {
+            btn.style.padding = '0.5rem 1rem'; // ZMENŠENO (bylo 0.8rem)
+            btn.style.fontSize = '0.85rem';
+            btn.style.margin = '0';
+            btn.style.width = '100%';
+            btn.style.textAlign = 'center';
+            btn.style.whiteSpace = 'nowrap';
+            btn.style.overflow = 'hidden';
+            btn.style.textOverflow = 'ellipsis';
+        });
+    } else if (width <= 480 && width >= 321) {
+        container.style.maxWidth = '425px';
+        container.style.width = '100%';
+        container.style.padding = '0.5rem 0.25rem'; // ZMENŠENO (bylo 0.8rem)
+        container.style.margin = '0.5rem auto'; // ZMENŠENO (bylo 0.8rem)
+
+        innerContainer.style.display = 'grid';
+        innerContainer.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        innerContainer.style.gap = '0.3rem'; // ZMENŠENO (bylo 0.6rem)
+        innerContainer.style.justifyItems = 'center';
+        innerContainer.style.alignItems = 'center';
+        innerContainer.style.padding = '0 0.25rem';
+
+        buttons.forEach(btn => {
+            btn.style.fontSize = '0.75rem';
+            btn.style.padding = '0.4rem 0.8rem'; // ZMENŠENO (bylo 0.7rem)
+            btn.style.margin = '0';
+            btn.style.width = '100%';
+            btn.style.textAlign = 'center';
+            btn.style.whiteSpace = 'nowrap';
+            btn.style.overflow = 'hidden';
+            btn.style.textOverflow = 'ellipsis';
+        });
+    } else if (width <= 320) {
+        container.style.maxWidth = '200px';
+        container.style.width = '100%';
+        container.style.padding = '0.3rem 0.1rem'; // ZMENŠENO (bylo 0.6rem)
+        container.style.margin = '0.3rem auto'; // ZMENŠENO (bylo 0.6rem)
+
+        innerContainer.style.display = 'grid';
+        innerContainer.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        innerContainer.style.gap = '0.2rem'; // ZMENŠENO (bylo 0.4rem)
+        innerContainer.style.justifyItems = 'center';
+        innerContainer.style.alignItems = 'center';
+        innerContainer.style.padding = '0 0.1rem';
+
+        buttons.forEach(btn => {
+            btn.style.fontSize = '0.7rem';
+            btn.style.padding = '0.3rem 0.4rem'; // ZMENŠENO (bylo 0.6rem)
+            btn.style.margin = '0';
+            btn.style.width = '100%';
+            btn.style.textAlign = 'center';
+            btn.style.whiteSpace = 'nowrap';
+            btn.style.overflow = 'hidden';
+            btn.style.textOverflow = 'ellipsis';
+        });
+    }
+} // <--- Tato závorka uzavírá funkci applyDataManagementResponsiveStyles()
+
+
+// --- Zde začíná funkce observeEditMode(), PŘESNĚ JAK JSI JI POSKYTL ---
+function observeEditMode() {
+    const body = document.body;
+
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                if (body.classList.contains('edit-mode')) {
+                    showDataManagementButtons();
+                    applyDataManagementResponsiveStyles();
+                } else {
+                    hideDataManagementButtons();
+                }
+            }
+        });
+    });
+   // <--- Tato závorka uzavírá funkci observeEditMode(), přesně podle tvého zadání.
 
         observer.observe(body, {
             attributes: true,
@@ -3510,6 +3513,7 @@ function initializeResponsiveGrid() {
 
         /* Skrytí user-id-display */
         #user-id-display {
+             
             grid-column: 1 / -1;
             margin-top: 20px;
         }
