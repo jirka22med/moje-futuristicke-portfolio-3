@@ -13,7 +13,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.5;
     color: #333;
-    background-color: #42a5f5; /* Toto zajistí jednotnou světle modrou barvu bez přechodu */ /* tady byl gradiend? linear-gradient(45deg, #42a5f5, #1e88e5)*/
+    background-color: #42a5f5; /* Toto zajistí jednotnou světle modrou barvu bez přechodu */
     min-height: 100vh;
     
     text-align: center;
@@ -22,7 +22,7 @@ body {
 
 :root {
     --header-bg-color: rgba(0,0,0,0.1); 
-    --text-color: white;
+    --text-color: black;
     --border-color: rgba(255,255,255,0.2);
     --secondary-text-color: rgba(255,255,255,0.8);
     --nav-bg-color: rgba(0,0,0,0.3);
@@ -32,12 +32,13 @@ body {
 }
 
 header {
-    background-color: var(--header-bg-color);
+    /* background-color: var(--header-bg-color);*/
     color: var(--text-color);
     text-align: center;
-    padding: 2rem 1rem;
-    border-bottom: 1px solid var(--border-color);
-     
+    /* Původní padding: 2rem 1rem; */
+    padding: 1.5rem 1rem; /* ZMENŠENO: Snížili jsme svislý padding uvnitř headeru */
+    /* border-bottom: 1px solid var(--border-color);*/
+    /* margin-top: -25px; -- TOTO JSME ODSTRANILI NA TVŮJ POŽADAVEK */
     font-weight: 600;
 }
 header h1 {
@@ -49,18 +50,20 @@ header h1 {
 }
 header p {
     font-size: 1.1em;
-    color:  white;
+    color: black;
     font-weight: bold;
 }
 
 nav { 
-    background-color: var(--nav-bg-color);
-    padding: 0.5rem 0;
+    /* background-color: var(--nav-bg-color);*/
+    /* Původní padding: 0.5rem 0; */
+    padding: 0.3rem 0; /* ZMENŠENO: Snížili jsme svislý padding uvnitř nav */
     position: sticky;
     top: 0;
     z-index: 1000;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    /*box-shadow: 0 2px 4px rgba(0,0,0,0.1);*/
     font-weight: 600;
+    margin-bottom: 1rem; /* PŘIDÁNO: Přidali jsme mezeru pod navigační lištu */
 }
 
 .nav-container {
@@ -71,7 +74,8 @@ nav {
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    /*gap: 0.5rem;*/
+    
+    gap: 5px;
 }
 
 .logo {
@@ -82,7 +86,7 @@ nav {
 }
 
 .nav-link, #edit-mode-toggle-btn, #login-button, #jirka-rezim-obrazovky{
-    color: white;
+    color: black;
     text-decoration: none;
     padding: 0.5rem 1rem;
     border-radius: 25px;
@@ -91,18 +95,19 @@ nav {
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     font-size: 0.9rem;
+    
 }
 
 .nav-link:hover, .nav-link.active{
     background: rgba(255, 255, 255, 0.25);
-     
+    
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
 #edit-mode-toggle-btn:hover , #login-button:hover, #jirka-rezim-obrazovky:hover{
     
   background: rgba(255, 255, 255, 0.25);
-     
+    
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);  
 }
 
@@ -136,9 +141,9 @@ nav {
 
 /*main {
     padding: 2rem 0;
-     
+    
     min-height: calc(100vh - 140px - 70px);
-     
+    
     width: 100%;
 }*/
 
@@ -146,20 +151,20 @@ nav {
     max-width: 100%;
     margin: 0 auto;
     padding: 0 1rem;
-     
+    
     width: 100%;
 }
 
-  section {
-     display: none;     
+section {
+    display: none;      
     visibility: hidden;  
-    position: absolute;   
-    top: 0;               
+    position: absolute;    
+    top: 0;                
     left: 0;              
     width: 100%;          
     background: rgba(255, 255, 255, 0.95);
-    margin: 1rem 0;
-    padding: 1.5rem;
+    /* margin: 1rem 0; -- TOTO JSME ODSTRANILI NA TVŮJ POŽADAVEK */
+    padding: 1.2rem 1.5rem; /* ZMENŠENO: Zmenšili jsme svislý padding uvnitř sekce (bylo 1.5rem) */
     border-radius: 15px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     backdrop-filter: blur(10px);
@@ -167,16 +172,17 @@ nav {
     border: 1px solid rgba(255, 255, 255, 0.2);
     opacity: 0;
     
+    margin-bottom: 1rem; /* PŘIDÁNO: Používáme margin-bottom pro mezeru mezi sekcemi */
 }
 
 
 section.active {
-     display: block;   
+    display: block;    
     visibility: visible;  
-    position: relative;   
+    position: relative;    
     opacity: 1;
-     
-} 
+    
+}  
 
 
 section h2, section h3 {
@@ -198,7 +204,7 @@ section h2 {
     border-bottom: 2px solid #667eea;
     padding-bottom: 0.5rem;
     color: #4a5568;
-} 
+}  
 
 .editor-container {
     display: grid;
@@ -229,9 +235,9 @@ section h2 {
     background: white;
 }
 
-  .button ,button {
+.button ,button {
     background: var(--primary-gradient);
-    color: white  ; 
+    color: white ;  
     border: none;
     padding: 10px 20px;
     border-radius: 10px;
@@ -239,10 +245,10 @@ section h2 {
     font-size: 1rem;
     font-weight: bold;
     
-      
-      
+    
+    
     margin: 0.5rem;
-    text-decoration: none; 
+    text-decoration: none;  
     display: inline-block;
 }
 
@@ -291,12 +297,12 @@ section h2 {
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-   
+    
     background-color: #e0e0e0;
 }
 
 .gallery-image-wrapper:hover {
-     
+    
 }
 
 .gallery-image-wrapper img {
@@ -311,7 +317,7 @@ section h2 {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: rgba(220,53,69,0.8); 
+    background: rgba(220,53,69,0.8);  
     color: white;
     border: none;
     width: 30px;
@@ -325,7 +331,7 @@ section h2 {
     
 }
 .delete-img-btn:hover {
-    background: #b02a37; 
+    background: #b02a37;  
 }
 
 .saved-code-item {
@@ -335,7 +341,7 @@ section h2 {
     padding: 1rem;
     margin-bottom: 1rem;
     cursor: pointer;
-     
+    
     width: 100%;
 }
 
@@ -646,27 +652,35 @@ body.edit-mode #links-table tbody tr {
 }
 
 footer {
-    background: rgba(0,0,0,0.8);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    color: white;
+    /*background: rgba(0,0,0,0.8);*/
+    /*backdrop-filter: blur(5px);*/
+   /* -webkit-backdrop-filter: blur(5px);*/
+    color: black;
     text-align: center;
     padding: 2rem 0;
     position: relative;
     width: 100%;
+    margin-top: -45px;
 }
 
 #user-id-display { 
+    display: inline-block;
     background: rgba(255,255,255,0.1);
     padding: 0.5rem 1rem;
     border-radius: 20px;
     font-size: 0.85rem; 
-    color: red;
+    color: white;
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
-    display: inline-block;
     margin-top: 0.5rem;
+    
+    /* Zakázání označování textu */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
+
 #user-id-display span {
     font-weight: bold;
 }
