@@ -222,7 +222,8 @@ section h2 {
     background: white;
 }
 
-  button {
+
+.button, button {
     background: rgba(255, 255, 255, 0.1);
     color: white  ; 
     border: none;
